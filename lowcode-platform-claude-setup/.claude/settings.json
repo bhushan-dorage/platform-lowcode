@@ -1,0 +1,23 @@
+{
+  "model": "claude-sonnet-4-5",
+  "env": {
+    "MAX_THINKING_TOKENS": "8000",
+    "CLAUDE_CODE_SUBAGENT_MODEL": "claude-haiku-4-5-20251001"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(mvn:*)",
+      "Bash(docker-compose:*)",
+      "Bash(git:*)",
+      "Bash(psql:*)",
+      "Bash(kafka-topics.sh:*)",
+      "Bash(curl:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)"
+    ],
+    "deny": [
+      "Bash(rm -rf /*)",
+      "Bash(kubectl delete namespace:*)"
+    ]
+  }
+}
