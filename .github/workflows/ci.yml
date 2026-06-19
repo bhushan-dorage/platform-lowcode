@@ -66,5 +66,7 @@ jobs:
         run: docker compose config --quiet
       - name: Validate Kong config
         run: |
-          docker run --rm -v ${{ github.workspace }}/infra/kong:/kong kong:3.6 \
+          docker run --rm \
+            -e KONG_DATABASE=off \
+            -v ${{ github.workspace }}/infra/kong:/kong kong:3.6 \
             kong config parse /kong/kong.yaml
