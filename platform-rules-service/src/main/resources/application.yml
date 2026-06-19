@@ -1,0 +1,27 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: platform-rules-service
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/platform}
+kie:
+  server:
+    url: ${KIE_SERVER_URL:http://localhost:8180/kie-server/services/rest}
+    user: ${KIE_USER:kieserver}
+    password: ${KIE_PASSWORD:kieserver1!}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+logging:
+  pattern:
+    console: "%d{ISO8601} %-5level [%X{tenantId}] [%X{requestId}] [%X{traceId}] %logger{36} - %msg%n"

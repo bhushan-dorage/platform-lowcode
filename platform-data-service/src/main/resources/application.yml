@@ -1,0 +1,35 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: platform-data-service
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/platform}
+    username: ${DB_USER:platform}
+    password: ${DB_PASSWORD:platform}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/platform}
+archival:
+  retention-days: ${ARCHIVAL_RETENTION_DAYS:90}
+  tenant-id: ${ARCHIVAL_TENANT_ID:}
+  cron: ${ARCHIVAL_CRON:0 0 2 * * *}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+logging:
+  pattern:
+    console: "%d{ISO8601} %-5level [%X{tenantId}] [%X{requestId}] [%X{traceId}] %logger{36} - %msg%n"
