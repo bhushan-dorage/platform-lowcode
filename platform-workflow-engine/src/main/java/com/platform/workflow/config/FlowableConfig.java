@@ -16,9 +16,7 @@ public class FlowableConfig {
             config.setAsyncExecutorActivate(true);
             config.setAsyncExecutorCorePoolSize(8);
             config.setAsyncExecutorMaxPoolSize(32);
-            config.setAsyncExecutorMaxJobsPerAcquisition(20);
             config.setAsyncHistoryEnabled(true);
-            config.setEnableHistoryCleanup(false); // archival handled separately
             config.setDatabaseSchemaUpdate("true");
         };
     }

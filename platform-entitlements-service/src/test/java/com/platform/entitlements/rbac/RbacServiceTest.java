@@ -39,7 +39,7 @@ class RbacServiceTest {
 
     @BeforeEach
     void setup() {
-        TenantContext.set("acme", TenantTier.PROFESSIONAL, null);
+        TenantContext.set("acme", TenantTier.PROFESSIONAL);
     }
 
     @Test

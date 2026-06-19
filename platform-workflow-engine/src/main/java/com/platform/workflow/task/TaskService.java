@@ -37,7 +37,7 @@ public class TaskService {
         this.kafkaProducer = kafkaProducer;
     }
 
-    @Timed(name = "workflow.task.inbox")
+    @Timed(value = "workflow.task.inbox")
     public CursorPage<TaskDto> getInbox(String userId, String cursor, int pageSize) {
         String tenantId = TenantContext.getTenantId();
         // Fetch pageSize+1 to determine hasMore; cursor filters by id > lastSeen
@@ -60,26 +60,26 @@ public class TaskService {
         return CursorPage.of(page.stream().map(this::toDto).toList(), nextCursor, hasMore, pageSize);
     }
 
-    @Timed(name = "workflow.task.get")
+    @Timed(value = "workflow.task.get")
     public TaskDto getTask(String taskId) {
         Task task = requireTask(taskId);
         return toDto(task);
     }
 
-    @Timed(name = "workflow.task.claim")
+    @Timed(value = "workflow.task.claim")
     public void claimTask(String taskId, String userId) {
         requireTask(taskId);
         taskClaimService.claimWithLock(taskId, userId, () -> flowableTaskService.claim(taskId, userId));
         log.info("Task claimed taskId={} userId={}", taskId, userId);
     }
 
-    @Timed(name = "workflow.task.unclaim")
+    @Timed(value = "workflow.task.unclaim")
     public void unclaimTask(String taskId, String userId) {
         requireTask(taskId);
         flowableTaskService.unclaim(taskId);
     }
 
-    @Timed(name = "workflow.task.complete")
+    @Timed(value = "workflow.task.complete")
     public void completeTask(String taskId, String userId, Map<String, Object> variables, String comment) {
         requireTask(taskId);
         Map<String, Object> prepared = claimCheckService.prepareVariables(TenantContext.getTenantId(), variables);
@@ -90,13 +90,13 @@ public class TaskService {
         log.info("Task completed taskId={} userId={}", taskId, userId);
     }
 
-    @Timed(name = "workflow.task.assign")
+    @Timed(value = "workflow.task.assign")
     public void assignTask(String taskId, String assignee) {
         requireTask(taskId);
         flowableTaskService.setAssignee(taskId, assignee);
     }
 
-    @Timed(name = "workflow.task.escalate")
+    @Timed(value = "workflow.task.escalate")
     public void escalateTask(String taskId, String escalateTo, String reason) {
         Task task = requireTask(taskId);
         if (reason != null && !reason.isBlank()) {

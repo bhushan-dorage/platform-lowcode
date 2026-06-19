@@ -20,7 +20,7 @@ public class WorkflowHistoryService {
 
     private final HistoryService historyService;
 
-    @Timed(name = "workflow.history.activities")
+    @Timed(value = "workflow.history.activities")
     public List<HistoricActivityDto> getProcessHistory(String processInstanceId) {
         String tenantId = TenantContext.getTenantId();
         // Verify instance belongs to this tenant
@@ -39,7 +39,7 @@ public class WorkflowHistoryService {
                 .toList();
     }
 
-    @Timed(name = "workflow.analytics.processes")
+    @Timed(value = "workflow.analytics.processes")
     public ProcessAnalyticsDto getProcessAnalytics(Instant from, Instant to) {
         String tenantId = TenantContext.getTenantId();
         HistoricProcessInstanceQuery base = historyService.createHistoricProcessInstanceQuery()

@@ -95,7 +95,6 @@ class PolicyCompilerServiceTest {
 
     @Test
     void compile_unknownOperatorThrows() {
-        when(policyRepo.save(any())).thenAnswer(i -> i.getArgument(0));
         String yaml = """
                 conditions:
                   - field: name

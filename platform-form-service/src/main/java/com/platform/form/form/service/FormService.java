@@ -28,7 +28,7 @@ public class FormService {
     private final JsonSchemaValidator schemaValidator;
     private final ObjectMapper objectMapper;
 
-    @Timed(name = "form.definition.create")
+    @Timed(value = "form.definition.create")
     @Transactional
     public FormDefinitionDto createForm(CreateFormRequest req, String createdBy) {
         String tenantId = TenantContext.getTenantId();
@@ -60,7 +60,7 @@ public class FormService {
         return toDto(formRepo.save(def));
     }
 
-    @Timed(name = "form.definition.list")
+    @Timed(value = "form.definition.list")
     public CursorPage<FormDefinitionDto> listForms(String cursor, int pageSize) {
         String tenantId = TenantContext.getTenantId();
         List<FormDefinition> results = cursor != null
@@ -75,12 +75,12 @@ public class FormService {
         return CursorPage.of(items.stream().map(this::toDto).toList(), nextCursor, hasMore, pageSize);
     }
 
-    @Timed(name = "form.definition.get")
+    @Timed(value = "form.definition.get")
     public FormDefinitionDto getForm(String formKey) {
         return toDto(requireForm(formKey));
     }
 
-    @Timed(name = "form.version.publish")
+    @Timed(value = "form.version.publish")
     @Transactional
     public FormVersion publishVersion(String formKey, PublishVersionRequest req, String publishedBy) {
         FormDefinition def = requireForm(formKey);
@@ -103,7 +103,7 @@ public class FormService {
         return ver;
     }
 
-    @Timed(name = "form.submission.validate")
+    @Timed(value = "form.submission.validate")
     public ValidationResult validateSubmission(String formKey, java.util.Map<String, Object> data) {
         FormDefinition def = requireForm(formKey);
         FormVersion ver = versionRepo
@@ -112,7 +112,7 @@ public class FormService {
         return schemaValidator.validate(ver.getJsonSchema(), data);
     }
 
-    @Timed(name = "form.submission.submit")
+    @Timed(value = "form.submission.submit")
     @Transactional
     public FormSubmission submitForm(String formKey, FormSubmissionRequest req, String submittedBy) {
         FormDefinition def = requireForm(formKey);
@@ -131,7 +131,7 @@ public class FormService {
         return submissionRepo.save(sub);
     }
 
-    @Timed(name = "form.submission.list")
+    @Timed(value = "form.submission.list")
     public CursorPage<FormSubmission> listSubmissions(String formKey, String cursor, int pageSize) {
         FormDefinition def = requireForm(formKey);
         List<FormSubmission> results = cursor != null

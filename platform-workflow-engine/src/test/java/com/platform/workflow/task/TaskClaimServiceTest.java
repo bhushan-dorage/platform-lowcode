@@ -32,7 +32,7 @@ class TaskClaimServiceTest {
     void setup() throws Exception {
         TenantContext.set("hsbc", TenantTier.ENTERPRISE);
         when(redissonClient.getLock(anyString())).thenReturn(rLock);
-        when(rLock.isHeldByCurrentThread()).thenReturn(true);
+        lenient().when(rLock.isHeldByCurrentThread()).thenReturn(true);
     }
 
     @AfterEach
@@ -54,7 +54,6 @@ class TaskClaimServiceTest {
     @Test
     void claimWithLock_throwsWhenLockNotAcquired() throws Exception {
         when(rLock.tryLock(5, 5, TimeUnit.SECONDS)).thenReturn(false);
-        when(rLock.isHeldByCurrentThread()).thenReturn(false);
 
         assertThatThrownBy(() -> taskClaimService.claimWithLock("task-2", "user-1", () -> {}))
                 .isInstanceOf(TaskAlreadyClaimedException.class)

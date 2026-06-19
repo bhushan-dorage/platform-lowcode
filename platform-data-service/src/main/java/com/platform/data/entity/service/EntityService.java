@@ -29,7 +29,7 @@ public class EntityService {
     private final EntityRecordRepository recordRepo;
     private final ObjectMapper objectMapper;
 
-    @Timed(name = "data.entity.define")
+    @Timed(value = "data.entity.define")
     @Transactional
     public EntityDefinition defineEntity(CreateEntityDefinitionRequest req, String createdBy) {
         String tenantId = TenantContext.getTenantId();
@@ -44,12 +44,12 @@ public class EntityService {
         return defRepo.save(def);
     }
 
-    @Timed(name = "data.entity.definitions.list")
+    @Timed(value = "data.entity.definitions.list")
     public List<EntityDefinition> listDefinitions() {
         return defRepo.findByTenantIdAndArchivedFalse(TenantContext.getTenantId());
     }
 
-    @Timed(name = "data.entity.record.create")
+    @Timed(value = "data.entity.record.create")
     @Transactional
     public EntityRecord createRecord(String entityType, UpsertEntityRecordRequest req, String createdBy) {
         String tenantId = TenantContext.getTenantId();
@@ -62,7 +62,7 @@ public class EntityService {
         return recordRepo.save(rec);
     }
 
-    @Timed(name = "data.entity.record.get")
+    @Timed(value = "data.entity.record.get")
     public Map<String, Object> getRecord(String entityType, UUID id) {
         String tenantId = TenantContext.getTenantId();
         EntityRecord rec = recordRepo.findByIdAndTenantIdAndArchivedAtIsNull(id, tenantId)
@@ -71,7 +71,7 @@ public class EntityService {
         return fromJson(rec.getData());
     }
 
-    @Timed(name = "data.entity.record.update")
+    @Timed(value = "data.entity.record.update")
     @Transactional
     public EntityRecord updateRecord(String entityType, UUID id, UpsertEntityRecordRequest req) {
         String tenantId = TenantContext.getTenantId();
@@ -82,7 +82,7 @@ public class EntityService {
         return recordRepo.save(rec);
     }
 
-    @Timed(name = "data.entity.record.list")
+    @Timed(value = "data.entity.record.list")
     public CursorPage<Map<String, Object>> listRecords(String entityType, String cursor, int pageSize) {
         String tenantId = TenantContext.getTenantId();
         requireDefinition(tenantId, entityType);

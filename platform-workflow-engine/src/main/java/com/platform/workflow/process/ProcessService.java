@@ -28,7 +28,7 @@ public class ProcessService {
     private final HistoryService historyService;
     private final ClaimCheckService claimCheckService;
 
-    @Timed(name = "workflow.process.start")
+    @Timed(value = "workflow.process.start")
     public ProcessStartResponse startProcess(ProcessStartRequest req) {
         String trackingId = UUID.randomUUID().toString();
         String tenantId = TenantContext.getTenantId();
@@ -50,14 +50,14 @@ public class ProcessService {
         return new ProcessStartResponse(trackingId, "QUEUED", Instant.now());
     }
 
-    @Timed(name = "workflow.process.status")
+    @Timed(value = "workflow.process.status")
     public ProcessStatusResponse getStatus(String trackingId) {
         ProcessStatusResponse status = processTracker.getStatus(TenantContext.getTenantId(), trackingId);
         if (status == null) throw new ResourceNotFoundException("Tracking ID not found: " + trackingId);
         return status;
     }
 
-    @Timed(name = "workflow.process.list")
+    @Timed(value = "workflow.process.list")
     public CursorPage<ProcessInstanceDto> listProcessInstances(String cursor, int pageSize) {
         String tenantId = TenantContext.getTenantId();
         var query = historyService.createHistoricProcessInstanceQuery()
@@ -81,7 +81,7 @@ public class ProcessService {
         return CursorPage.of(dtos, nextCursor, hasMore, pageSize);
     }
 
-    @Timed(name = "workflow.process.variables")
+    @Timed(value = "workflow.process.variables")
     public Map<String, Object> getProcessVariables(String processInstanceId) {
         String tenantId = TenantContext.getTenantId();
         var instance = historyService.createHistoricProcessInstanceQuery()

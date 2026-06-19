@@ -28,7 +28,7 @@ public class BundleService {
     private final ArtifactRepository artifactRepo;
     private final TenantAwareKafkaProducer kafkaProducer;
 
-    @Timed(name = "studio.bundle.create")
+    @Timed(value = "studio.bundle.create")
     @Transactional
     public DeploymentBundle createBundle(CreateBundleRequest req, String userId) {
         String tenantId = TenantContext.getTenantId();
@@ -43,7 +43,7 @@ public class BundleService {
         return bundleRepo.save(bundle);
     }
 
-    @Timed(name = "studio.bundle.deploy")
+    @Timed(value = "studio.bundle.deploy")
     @Transactional
     public DeploymentBundle deployBundle(UUID bundleId, String userId) {
         String tenantId = TenantContext.getTenantId();

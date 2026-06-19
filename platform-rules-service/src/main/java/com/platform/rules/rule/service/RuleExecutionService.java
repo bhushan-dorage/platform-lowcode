@@ -32,7 +32,7 @@ public class RuleExecutionService {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
-    @Timed(name = "rules.execution")
+    @Timed(value = "rules.execution")
     public RuleExecutionResponse execute(RuleExecutionRequest req) {
         String tenantId = TenantContext.getTenantId();
         String containerId = req.containerId() != null ? req.containerId() : req.ruleSetKey();

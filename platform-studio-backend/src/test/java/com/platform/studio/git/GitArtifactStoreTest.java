@@ -2,6 +2,12 @@ package com.platform.studio.git;
 
 import com.platform.studio.artifact.domain.ArtifactType;
 import com.platform.studio.artifact.service.GitArtifactStore;
+import org.eclipse.jgit.lib.Config;
+import org.eclipse.jgit.storage.file.FileBasedConfig;
+import org.eclipse.jgit.util.FS;
+import org.eclipse.jgit.util.SystemReader;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -17,6 +23,61 @@ class GitArtifactStoreTest {
     File tempDir;
 
     GitArtifactStore store;
+
+    /**
+     * JGit 6.x fails to parse gpg.format=ssh (only knows openpgp/x509).
+     * Override SystemReader so the global ~/.gitconfig is never loaded.
+     */
+    @BeforeAll
+    static void overrideGitSystemReader() {
+        SystemReader.setInstance(new SystemReader() {
+            @Override
+            public String getHostname() { return "localhost"; }
+
+            @Override
+            public String getenv(String variable) { return System.getenv(variable); }
+
+            @Override
+            public String getProperty(String key) { return System.getProperty(key); }
+
+            @Override
+            public FileBasedConfig openUserConfig(Config parent, FS fs) {
+                return new FileBasedConfig(parent, null, fs) {
+                    @Override public void load() {}
+                    @Override public boolean isOutdated() { return false; }
+                };
+            }
+
+            @Override
+            public FileBasedConfig openSystemConfig(Config parent, FS fs) {
+                return new FileBasedConfig(parent, null, fs) {
+                    @Override public void load() {}
+                    @Override public boolean isOutdated() { return false; }
+                };
+            }
+
+            @Override
+            public FileBasedConfig openJGitConfig(Config parent, FS fs) {
+                return new FileBasedConfig(parent, null, fs) {
+                    @Override public void load() {}
+                    @Override public boolean isOutdated() { return false; }
+                };
+            }
+
+            @Override
+            public long getCurrentTime() { return System.currentTimeMillis(); }
+
+            @Override
+            public int getTimezone(long when) {
+                return java.util.TimeZone.getDefault().getOffset(when) / (60 * 1000);
+            }
+        });
+    }
+
+    @AfterAll
+    static void restoreGitSystemReader() {
+        SystemReader.setInstance(null);
+    }
 
     @BeforeEach
     void setUp() throws Exception {

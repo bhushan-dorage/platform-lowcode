@@ -27,7 +27,7 @@ public class RbacService {
     private final UserRoleRepository userRoleRepo;
     private final EntitlementsCacheService cacheService;
 
-    @Timed(name = "entitlements.role.create")
+    @Timed(value = "entitlements.role.create")
     @Transactional
     public Role createRole(String name, String displayName, UUID parentRoleId) {
         String tenantId = TenantContext.getTenantId();
@@ -39,7 +39,7 @@ public class RbacService {
         return roleRepo.save(role);
     }
 
-    @Timed(name = "entitlements.role.grant-permission")
+    @Timed(value = "entitlements.role.grant-permission")
     @Transactional
     public void grantPermission(String roleName, String permissionName) {
         String tenantId = TenantContext.getTenantId();
@@ -57,7 +57,7 @@ public class RbacService {
         cacheService.evictRolePredicates(tenantId, roleName);
     }
 
-    @Timed(name = "entitlements.user.assign-role")
+    @Timed(value = "entitlements.user.assign-role")
     @Transactional
     public void assignRole(String userId, String roleName) {
         String tenantId = TenantContext.getTenantId();
@@ -71,7 +71,7 @@ public class RbacService {
         cacheService.evictUserPermissions(tenantId, userId);
     }
 
-    @Timed(name = "entitlements.user.effective-permissions")
+    @Timed(value = "entitlements.user.effective-permissions")
     public Set<String> getEffectivePermissions(String userId) {
         return cacheService.getEffectivePermissions(TenantContext.getTenantId(), userId);
     }

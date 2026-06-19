@@ -42,6 +42,7 @@ public class GitArtifactStore {
             RevCommit commit = git.commit()
                     .setMessage("Save " + type.name() + ": " + name)
                     .setAuthor(author, author + "@platform.studio")
+                    .setSign(false)
                     .call();
             log.debug("Committed artifact tenantId={} type={} name={} sha={}", tenantId, type, name, commit.getName());
             return commit.getName();
@@ -122,6 +123,7 @@ public class GitArtifactStore {
                 .setMessage("init")
                 .setAuthor("platform-studio", "studio@platform.io")
                 .setAllowEmpty(true)
+                .setSign(false)
                 .call();
         log.info("Initialized git repo for tenantId={} at {}", tenantId, dir);
         return git;

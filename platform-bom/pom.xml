@@ -83,10 +83,11 @@
                 <scope>test</scope>
             </dependency>
 
-            <!-- Testcontainers — Kafka version managed by spring-boot-dependencies above -->
+            <!-- Testcontainers — Kafka (version from spring-boot-dependencies) -->
             <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>kafka</artifactId>
+                <version>1.19.8</version>
                 <scope>test</scope>
             </dependency>
 
@@ -98,10 +99,11 @@
                 <scope>test</scope>
             </dependency>
 
-            <!-- Micrometer Prometheus — version managed by Spring Boot BOM -->
+            <!-- Micrometer Prometheus — version from spring-boot-dependencies -->
             <dependency>
                 <groupId>io.micrometer</groupId>
                 <artifactId>micrometer-registry-prometheus</artifactId>
+                <version>1.13.5</version>
             </dependency>
 
             <!-- OpenTelemetry API -->

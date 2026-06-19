@@ -35,7 +35,7 @@ class ClaimCheckServiceTest {
     void setup() {
         ReflectionTestUtils.setField(claimCheckService, "thresholdBytes", 10240);
         ReflectionTestUtils.setField(claimCheckService, "objectMapper", objectMapper);
-        when(redis.opsForValue()).thenReturn(valueOps);
+        lenient().when(redis.opsForValue()).thenReturn(valueOps);
         TenantContext.set("acme", TenantTier.ENTERPRISE);
     }
 

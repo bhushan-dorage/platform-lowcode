@@ -27,7 +27,7 @@ public class ArtifactService {
     private final ArtifactRepository artifactRepo;
     private final GitArtifactStore gitStore;
 
-    @Timed(name = "studio.artifact.save")
+    @Timed(value = "studio.artifact.save")
     @Transactional
     public ArtifactDto save(SaveArtifactRequest req, String userId) {
         String tenantId = TenantContext.getTenantId();
@@ -50,7 +50,7 @@ public class ArtifactService {
         return ArtifactDto.from(artifactRepo.save(artifact));
     }
 
-    @Timed(name = "studio.artifact.publish")
+    @Timed(value = "studio.artifact.publish")
     @Transactional
     public ArtifactDto publish(UUID artifactId, String version, String userId) {
         String tenantId = TenantContext.getTenantId();
@@ -68,7 +68,7 @@ public class ArtifactService {
         return ArtifactDto.from(artifactRepo.save(artifact));
     }
 
-    @Timed(name = "studio.artifact.get-content")
+    @Timed(value = "studio.artifact.get-content")
     public ArtifactContentDto getContent(UUID artifactId, String ref) {
         String tenantId = TenantContext.getTenantId();
         Artifact artifact = findOrThrow(artifactId, tenantId);
@@ -78,7 +78,7 @@ public class ArtifactService {
         return new ArtifactContentDto(ArtifactDto.from(artifact), content);
     }
 
-    @Timed(name = "studio.artifact.get-published-content")
+    @Timed(value = "studio.artifact.get-published-content")
     public ArtifactContentDto getPublishedContent(UUID artifactId, String version) {
         String tenantId = TenantContext.getTenantId();
         Artifact artifact = findOrThrow(artifactId, tenantId);
