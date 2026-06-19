@@ -58,6 +58,26 @@ jobs:
           REDIS_HOST: localhost
           REDIS_PORT: 6379
 
+  build-platform-audit-service:
+    needs: [build-platform-bom, build-platform-common]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+      - name: Install platform-bom
+        working-directory: platform-bom
+        run: mvn -B install -DskipTests
+      - name: Install platform-common
+        working-directory: platform-common
+        run: mvn -B install -DskipTests
+      - name: Test platform-audit-service
+        working-directory: platform-audit-service
+        run: mvn -B verify
+
   lint-infra:
     runs-on: ubuntu-latest
     steps:

@@ -191,6 +191,31 @@ services:
       - grafana_data:/var/lib/grafana
       - ./infra/grafana/provisioning:/etc/grafana/provisioning
 
+  platform-audit-service:
+    build:
+      context: ./platform-audit-service
+      dockerfile: Dockerfile
+    image: platform-audit-service:latest
+    ports:
+      - "8086:8080"
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      CLICKHOUSE_URL: jdbc:ch://clickhouse:8123/platform_audit
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: ""
+      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/platform
+    depends_on:
+      kafka:
+        condition: service_healthy
+      clickhouse:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
 volumes:
   pg_data:
   redis_data:
