@@ -1,0 +1,58 @@
+# .claudeignore — files Claude should never read
+
+# Build artifacts
+**/target/
+**/.gradle/
+**/build/
+**/*.class
+**/*.jar
+**/*.war
+
+# Node / Frontend
+**/node_modules/
+**/dist/
+**/.next/
+**/coverage/
+
+# Generated code
+**/generated-sources/
+**/generated/
+**/*_generated.*
+
+# IDE
+**/.idea/
+**/*.iml
+**/.vscode/
+**/.DS_Store
+
+# Archive & history (0-token unless explicitly requested)
+.claude/completions/
+.claude/sessions/
+docs/archive/
+
+# Secrets — NEVER load
+**/.env
+**/*.pem
+**/*.key
+**/*.p12
+**/*.jks
+**/vault-token
+
+# Large data files
+**/*.csv
+**/*.sql.gz
+**/*.dump
+**/testdata/*.json
+
+# Logs
+**/*.log
+**/logs/
+
+# Docker volumes
+**/docker-volumes/
+
+# Kubernetes generated manifests (use Helm templates instead)
+infra/generated-manifests/
+
+# Old design docs (archived)
+docs/archive/

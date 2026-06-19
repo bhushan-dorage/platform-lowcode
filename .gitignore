@@ -1,0 +1,30 @@
+# Build artifacts
+**/target/
+**/.mvn/wrapper/maven-wrapper.jar
+**/*.class
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+
+# Local config overrides
+docker-compose.override.yml
+.env
+.env.local
+
+# Extracted zip (planning artifacts)
+lowcode-platform-claude-setup/
+lowcode-test-claude-setup/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Claude Code internal worktrees
+.claude/

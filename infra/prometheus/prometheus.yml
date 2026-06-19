@@ -1,0 +1,27 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: platform-services
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets:
+          - platform-workflow-engine:8080
+          - platform-form-service:8080
+          - platform-data-service:8080
+          - platform-audit-service:8080
+          - platform-notification-service:8080
+          - platform-entitlements-service:8080
+
+  - job_name: kafka
+    static_configs:
+      - targets: ['kafka:9308']
+
+  - job_name: postgres
+    static_configs:
+      - targets: ['postgres-exporter:9187']

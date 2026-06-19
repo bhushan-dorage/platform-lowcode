@@ -1,0 +1,53 @@
+_format_version: "3.0"
+
+services:
+  - name: workflow-engine
+    url: http://platform-workflow-engine:8080
+    routes:
+      - name: workflow-routes
+        paths:
+          - /api/v1/processes
+          - /api/v1/tasks
+        strip_path: false
+
+  - name: form-service
+    url: http://platform-form-service:8080
+    routes:
+      - name: form-routes
+        paths:
+          - /api/v1/forms
+        strip_path: false
+
+  - name: data-service
+    url: http://platform-data-service:8080
+    routes:
+      - name: data-routes
+        paths:
+          - /api/v1/entities
+        strip_path: false
+
+  - name: audit-service
+    url: http://platform-audit-service:8080
+    routes:
+      - name: audit-routes
+        paths:
+          - /api/v1/audit
+        strip_path: false
+
+plugins:
+  - name: rate-limiting
+    config:
+      minute: 1000
+      hour: 10000
+      policy: local
+
+  - name: correlation-id
+    config:
+      header_name: X-Request-ID
+      generator: uuid
+      echo_downstream: true
+
+  - name: request-size-limiting
+    config:
+      allowed_payload_size: 10
+      size_unit: megabytes
