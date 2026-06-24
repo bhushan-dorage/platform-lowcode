@@ -78,6 +78,66 @@ jobs:
         working-directory: platform-audit-service
         run: mvn -B verify
 
+  build-platform-integration-service:
+    needs: [build-platform-bom, build-platform-common]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+      - name: Install platform-bom
+        working-directory: platform-bom
+        run: mvn -B install -DskipTests
+      - name: Install platform-common
+        working-directory: platform-common
+        run: mvn -B install -DskipTests
+      - name: Test platform-integration-service
+        working-directory: platform-integration-service
+        run: mvn -B verify
+
+  build-platform-notification-service:
+    needs: [build-platform-bom, build-platform-common]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+      - name: Install platform-bom
+        working-directory: platform-bom
+        run: mvn -B install -DskipTests
+      - name: Install platform-common
+        working-directory: platform-common
+        run: mvn -B install -DskipTests
+      - name: Test platform-notification-service
+        working-directory: platform-notification-service
+        run: mvn -B verify
+
+  build-platform-webhook-service:
+    needs: [build-platform-bom, build-platform-common]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+      - name: Install platform-bom
+        working-directory: platform-bom
+        run: mvn -B install -DskipTests
+      - name: Install platform-common
+        working-directory: platform-common
+        run: mvn -B install -DskipTests
+      - name: Test platform-webhook-service
+        working-directory: platform-webhook-service
+        run: mvn -B verify
+
   lint-infra:
     runs-on: ubuntu-latest
     steps:
