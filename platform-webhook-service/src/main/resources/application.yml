@@ -1,0 +1,41 @@
+server:
+  port: 8089
+
+spring:
+  application:
+    name: platform-webhook-service
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/platform}
+    username: ${DB_USER:platform}
+    password: ${DB_PASSWORD:platform}
+  jpa:
+    hibernate:
+      ddl-auto: update
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: webhook-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.platform.webhook.event"
+        spring.json.value.default.type: "com.platform.webhook.event.WebhookEvent"
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/platform}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
