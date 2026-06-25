@@ -138,6 +138,57 @@ jobs:
         working-directory: platform-webhook-service
         run: mvn -B verify
 
+  build-portal-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: platform-portal-frontend/package-lock.json
+      - name: Install dependencies
+        working-directory: platform-portal-frontend
+        run: npm ci
+      - name: Run tests
+        working-directory: platform-portal-frontend
+        run: npm test
+      - name: Build
+        working-directory: platform-portal-frontend
+        run: npm run build
+
+  build-sdk-java:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+      - name: Build and test platform-sdk-java
+        working-directory: platform-sdk-java
+        run: mvn -B verify
+
+  build-sdk-js:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: platform-sdk-js/package-lock.json
+      - name: Install dependencies
+        working-directory: platform-sdk-js
+        run: npm ci
+      - name: Run tests
+        working-directory: platform-sdk-js
+        run: npm test
+      - name: Build
+        working-directory: platform-sdk-js
+        run: npm run build
+
   lint-infra:
     runs-on: ubuntu-latest
     steps:
