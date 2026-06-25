@@ -1,0 +1,861 @@
+openapi: 3.1.0
+info:
+  title: Platform Low-Code Workflow Engine API
+  version: 1.0.0
+  description: |
+    REST API for the Platform low-code workflow engine. All endpoints are
+    tenant-scoped. Provide a valid Bearer token (Keycloak PKCE or client
+    credentials) in every request.
+  contact:
+    name: Platform Engineering
+    email: platform-eng@example.com
+
+servers:
+  - url: https://api.platform.example.com
+    description: Production
+  - url: https://staging-api.platform.example.com
+    description: Staging
+  - url: http://localhost:8000
+    description: Local (Kong gateway)
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Processes
+    description: Process instance lifecycle
+  - name: Tasks
+    description: Human task management
+  - name: Forms
+    description: Form schema management and submission
+  - name: Audit
+    description: Immutable audit trail
+  - name: Entitlements
+    description: RBAC and ABAC policy management
+  - name: Integrations
+    description: Apache Camel integration routes
+  - name: Notifications
+    description: Multi-channel notifications
+  - name: Webhooks
+    description: Outbound webhook management
+  - name: Health
+    description: Service health and metrics
+
+paths:
+  # ── Processes ──────────────────────────────────────────────────────────
+  /api/v1/processes:
+    get:
+      tags: [Processes]
+      summary: List process instances
+      operationId: listProcesses
+      x-tenant-scoped: true
+      parameters:
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/cursor'
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [PENDING, ACTIVE, COMPLETED, FAILED, TERMINATED]
+        - name: processKey
+          in: query
+          schema:
+            type: string
+        - name: businessKey
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paginated list of process instances
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProcessInstances'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    post:
+      tags: [Processes]
+      summary: Start a new process instance
+      operationId: startProcess
+      x-tenant-scoped: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartProcessRequest'
+            example:
+              processKey: loan-application
+              businessKey: LOAN-2024-001
+              variables:
+                applicantId: user-123
+                amount: 50000
+                currency: USD
+      responses:
+        '201':
+          description: Process instance started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: Duplicate businessKey or idempotencyKey
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/processes/{id}:
+    get:
+      tags: [Processes]
+      summary: Get process instance by ID
+      operationId: getProcess
+      x-tenant-scoped: true
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          description: Process instance
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelope'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/processes/{id}/signal/{signalName}:
+    post:
+      tags: [Processes]
+      summary: Send signal to a running process
+      operationId: signalProcess
+      x-tenant-scoped: true
+      parameters:
+        - $ref: '#/components/parameters/id'
+        - name: signalName
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '204':
+          description: Signal sent
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/processes/{id}/terminate:
+    post:
+      tags: [Processes]
+      summary: Terminate a running process
+      operationId: terminateProcess
+      x-tenant-scoped: true
+      parameters:
+        - $ref: '#/components/parameters/id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+      responses:
+        '204':
+          description: Process terminated
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── Tasks ───────────────────────────────────────────────────────────────
+  /api/v1/tasks:
+    get:
+      tags: [Tasks]
+      summary: List tasks (inbox)
+      operationId: listTasks
+      x-tenant-scoped: true
+      parameters:
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/cursor'
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [OPEN, CLAIMED, COMPLETED]
+        - name: priority
+          in: query
+          schema:
+            type: string
+            enum: [LOW, MEDIUM, HIGH, CRITICAL]
+        - name: processKey
+          in: query
+          schema:
+            type: string
+        - name: group
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paginated task list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTasks'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/tasks/{id}/claim:
+    post:
+      tags: [Tasks]
+      summary: Claim a task
+      operationId: claimTask
+      x-tenant-scoped: true
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          description: Task claimed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelope'
+        '409':
+          description: Task already claimed by another user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/tasks/{id}/complete:
+    post:
+      tags: [Tasks]
+      summary: Complete a claimed task
+      operationId: completeTask
+      x-tenant-scoped: true
+      parameters:
+        - $ref: '#/components/parameters/id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                outcome:
+                  type: string
+                  example: APPROVED
+                variables:
+                  type: object
+                  additionalProperties: true
+      responses:
+        '204':
+          description: Task completed
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/tasks/{id}/reassign:
+    post:
+      tags: [Tasks]
+      summary: Reassign a task
+      operationId: reassignTask
+      x-tenant-scoped: true
+      parameters:
+        - $ref: '#/components/parameters/id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                assignTo:
+                  type: string
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Task reassigned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelope'
+
+  # ── Forms ───────────────────────────────────────────────────────────────
+  /api/v1/forms:
+    get:
+      tags: [Forms]
+      summary: List form schemas
+      operationId: listForms
+      x-tenant-scoped: true
+      parameters:
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/cursor'
+      responses:
+        '200':
+          description: Paginated form schemas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedForms'
+    post:
+      tags: [Forms]
+      summary: Create a form schema
+      operationId: createForm
+      x-tenant-scoped: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FormSchema'
+      responses:
+        '201':
+          description: Form created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelope'
+
+  /api/v1/forms/submit:
+    post:
+      tags: [Forms]
+      summary: Submit form data
+      operationId: submitForm
+      x-tenant-scoped: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [formKey, data]
+              properties:
+                formKey:
+                  type: string
+                taskId:
+                  type: string
+                data:
+                  type: object
+                  additionalProperties: true
+      responses:
+        '202':
+          description: Form submission accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '422':
+          description: Form validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ── Audit ───────────────────────────────────────────────────────────────
+  /api/v1/audit:
+    get:
+      tags: [Audit]
+      summary: Query audit events
+      operationId: queryAudit
+      x-tenant-scoped: true
+      parameters:
+        - $ref: '#/components/parameters/pageSize'
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: domain
+          in: query
+          schema:
+            type: string
+        - name: operation
+          in: query
+          schema:
+            type: string
+        - name: resourceId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Audit events
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAuditEvents'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/audit/compliance/{framework}:
+    get:
+      tags: [Audit]
+      summary: Generate compliance evidence report
+      operationId: complianceReport
+      x-tenant-scoped: true
+      parameters:
+        - name: framework
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [SOC2, ISO27001, GDPR, HIPAA]
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Compliance report
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelope'
+
+  # ── Webhooks ────────────────────────────────────────────────────────────
+  /api/v1/webhooks:
+    get:
+      tags: [Webhooks]
+      summary: List webhook registrations
+      operationId: listWebhooks
+      x-tenant-scoped: true
+      responses:
+        '200':
+          description: Webhook list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WebhookRegistration'
+    post:
+      tags: [Webhooks]
+      summary: Register a webhook
+      operationId: createWebhook
+      x-tenant-scoped: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookRegistration'
+            example:
+              url: https://my-app.example.com/hooks/platform
+              secret: my-signing-secret
+              eventTypes:
+                - FORM_SUBMITTED
+                - TASK_COMPLETED
+      responses:
+        '201':
+          description: Webhook registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookRegistration'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/v1/webhooks/{id}/deliveries:
+    get:
+      tags: [Webhooks]
+      summary: Get delivery log for a webhook
+      operationId: getWebhookDeliveries
+      x-tenant-scoped: true
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          description: Delivery log
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WebhookDeliveryLog'
+
+  # ── Health ───────────────────────────────────────────────────────────────
+  /actuator/health:
+    get:
+      tags: [Health]
+      summary: Health check
+      operationId: health
+      security: []
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [UP, DOWN, OUT_OF_SERVICE]
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    clientCredentials:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://auth.platform.example.com/realms/platform/protocol/openid-connect/token
+          scopes:
+            platform:read: Read access to platform resources
+            platform:write: Write access to platform resources
+            platform:admin: Administrative access
+
+  parameters:
+    id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    pageSize:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        default: 20
+        minimum: 1
+        maximum: 100
+    cursor:
+      name: cursor
+      in: query
+      schema:
+        type: string
+      description: Opaque cursor for pagination
+
+  responses:
+    BadRequest:
+      description: Invalid request payload
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Missing or invalid Bearer token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalError:
+      description: Unexpected server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    SuccessEnvelope:
+      type: object
+      properties:
+        data:
+          type: object
+        requestId:
+          type: string
+          format: uuid
+        traceId:
+          type: string
+
+    ErrorResponse:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          example: VALIDATION_ERROR
+        message:
+          type: string
+        traceId:
+          type: string
+
+    PaginatedResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items: {}
+        cursor:
+          type: string
+        hasMore:
+          type: boolean
+        totalElements:
+          type: integer
+          format: int64
+
+    ProcessInstance:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        processKey:
+          type: string
+        businessKey:
+          type: string
+        status:
+          type: string
+          enum: [PENDING, ACTIVE, COMPLETED, FAILED, TERMINATED]
+        startedAt:
+          type: string
+          format: date-time
+        endedAt:
+          type: string
+          format: date-time
+        tenantId:
+          type: string
+        variables:
+          type: object
+          additionalProperties: true
+
+    StartProcessRequest:
+      type: object
+      required: [processKey]
+      properties:
+        processKey:
+          type: string
+        businessKey:
+          type: string
+        idempotencyKey:
+          type: string
+        callbackUrl:
+          type: string
+          format: uri
+        variables:
+          type: object
+          additionalProperties: true
+
+    Task:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        processKey:
+          type: string
+        businessKey:
+          type: string
+        priority:
+          type: string
+          enum: [LOW, MEDIUM, HIGH, CRITICAL]
+        dueDate:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [OPEN, CLAIMED, COMPLETED]
+        assignee:
+          type: string
+        tenantId:
+          type: string
+
+    FormSchema:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        key:
+          type: string
+        name:
+          type: string
+        version:
+          type: integer
+        schema:
+          type: object
+          description: JSON Schema object
+        uiSchema:
+          type: object
+        tenantId:
+          type: string
+
+    AuditEvent:
+      type: object
+      properties:
+        eventId:
+          type: string
+          format: uuid
+        eventType:
+          type: string
+        domain:
+          type: string
+        tenantId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        actorUserId:
+          type: string
+        actorIp:
+          type: string
+        resourceType:
+          type: string
+        resourceId:
+          type: string
+        operation:
+          type: string
+        eventHash:
+          type: string
+          description: SHA-256 hash chained from previous event
+
+    WebhookRegistration:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        url:
+          type: string
+          format: uri
+        secret:
+          type: string
+          writeOnly: true
+        eventTypes:
+          type: array
+          items:
+            type: string
+        active:
+          type: boolean
+        tenantId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    WebhookDeliveryLog:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        webhookId:
+          type: string
+        eventId:
+          type: string
+        eventType:
+          type: string
+        httpStatusCode:
+          type: integer
+        success:
+          type: boolean
+        errorMessage:
+          type: string
+        attemptNumber:
+          type: integer
+        attemptedAt:
+          type: string
+          format: date-time
+        durationMs:
+          type: integer
+          format: int64
+
+    PaginatedProcessInstances:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedResponse'
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/ProcessInstance'
+
+    PaginatedTasks:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedResponse'
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/Task'
+
+    PaginatedForms:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedResponse'
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/FormSchema'
+
+    PaginatedAuditEvents:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedResponse'
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/AuditEvent'
