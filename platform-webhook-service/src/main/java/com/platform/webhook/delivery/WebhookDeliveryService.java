@@ -28,10 +28,8 @@ public class WebhookDeliveryService {
 
     private final WebhookRegistrationRepository registrationRepository;
     private final WebhookDeliveryRepository deliveryRepository;
-
-    private final HttpClient httpClient = HttpClient.newBuilder()
-            .connectTimeout(Duration.ofSeconds(10))
-            .build();
+    private final HttpClient httpClient;
+    private final DeliverySleeper sleeper;
 
     public void deliver(WebhookEvent event) {
         List<WebhookRegistration> registrations = registrationRepository
@@ -55,7 +53,7 @@ public class WebhookDeliveryService {
                 log.info("Retrying webhook delivery attempt {} for webhook {} after {}s",
                         attempt + 1, registration.getId(), delaySeconds);
                 try {
-                    Thread.sleep(delaySeconds * 1000L);
+                    sleeper.sleep(delaySeconds * 1000L);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     return;

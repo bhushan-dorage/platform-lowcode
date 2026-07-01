@@ -10,6 +10,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.platform.webhook.delivery.DeliverySleeper;
+
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +29,12 @@ class WebhookDeliveryServiceTest {
 
     @Mock
     private WebhookDeliveryRepository deliveryRepository;
+
+    @Mock
+    private HttpClient httpClient;
+
+    @Mock
+    private DeliverySleeper sleeper;
 
     @InjectMocks
     private WebhookDeliveryService deliveryService;
@@ -47,15 +58,15 @@ class WebhookDeliveryServiceTest {
         verify(deliveryRepository, never()).save(any());
     }
 
+    @SuppressWarnings("unchecked")
     @Test
-    void deliver_withRegistration_savesDeliveryLog() {
-        WebhookRegistration reg = new WebhookRegistration();
-        reg.setId("wh-1");
-        reg.setTenantId("acme");
-        reg.setUrl("http://invalid-test-url-will-fail.example.com/webhook");
-        reg.setSecret("secret-key");
-        reg.setEventTypes(List.of("FORM_SUBMITTED"));
-        reg.setActive(true);
+    void deliver_withRegistration_successOnFirstAttempt() throws Exception {
+        WebhookRegistration reg = buildRegistration("wh-1");
+
+        HttpResponse<String> mockResponse = mock(HttpResponse.class);
+        when(mockResponse.statusCode()).thenReturn(200);
+        when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class)))
+                .thenReturn(mockResponse);
 
         when(registrationRepository.findActiveByTenantIdAndEventType("acme", "FORM_SUBMITTED"))
                 .thenReturn(List.of(reg));
@@ -63,32 +74,60 @@ class WebhookDeliveryServiceTest {
 
         deliveryService.deliver(sampleEvent);
 
-        verify(deliveryRepository, atLeastOnce()).save(argThat(log ->
-                log.getWebhookId().equals("wh-1") && log.getEventId().equals("evt-1")));
+        verify(deliveryRepository, times(1)).save(argThat(log ->
+                log.getWebhookId().equals("wh-1") && log.getEventId().equals("evt-1") && log.isSuccess()));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
-    void deliver_successfulDelivery_stopsRetrying() {
-        // This test verifies that when a registration exists but delivery fails,
-        // at least one delivery log is saved
-        WebhookRegistration reg = new WebhookRegistration();
-        reg.setId("wh-2");
-        reg.setTenantId("acme");
-        reg.setUrl("http://no-connect.test/webhook");
-        reg.setSecret("s");
-        reg.setEventTypes(List.of("FORM_SUBMITTED"));
-        reg.setActive(true);
+    void deliver_retriesOn5xx_stopsWhenSuccessful() throws Exception {
+        WebhookRegistration reg = buildRegistration("wh-2");
+
+        HttpResponse<String> failResponse = mock(HttpResponse.class);
+        when(failResponse.statusCode()).thenReturn(500);
+        HttpResponse<String> okResponse = mock(HttpResponse.class);
+        when(okResponse.statusCode()).thenReturn(200);
+
+        when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class)))
+                .thenReturn(failResponse)
+                .thenReturn(okResponse);
 
         when(registrationRepository.findActiveByTenantIdAndEventType("acme", "FORM_SUBMITTED"))
                 .thenReturn(List.of(reg));
-        when(deliveryRepository.save(any())).thenAnswer(i -> {
-            WebhookDeliveryLog log = i.getArgument(0);
-            // Simulate success on first attempt to prevent actual retries
-            log.setSuccess(true);
-            return log;
-        });
+        when(deliveryRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
         deliveryService.deliver(sampleEvent);
-        verify(deliveryRepository, times(1)).save(any());
+
+        verify(deliveryRepository, times(2)).save(any());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void deliver_allAttemptsExhausted_savesAllLogs() throws Exception {
+        WebhookRegistration reg = buildRegistration("wh-3");
+
+        HttpResponse<String> failResponse = mock(HttpResponse.class);
+        when(failResponse.statusCode()).thenReturn(503);
+        when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class)))
+                .thenReturn(failResponse);
+
+        when(registrationRepository.findActiveByTenantIdAndEventType("acme", "FORM_SUBMITTED"))
+                .thenReturn(List.of(reg));
+        when(deliveryRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        deliveryService.deliver(sampleEvent);
+
+        verify(deliveryRepository, times(5)).save(any());
+    }
+
+    private WebhookRegistration buildRegistration(String id) {
+        WebhookRegistration reg = new WebhookRegistration();
+        reg.setId(id);
+        reg.setTenantId("acme");
+        reg.setUrl("http://test-endpoint.example.com/webhook");
+        reg.setSecret("secret-key");
+        reg.setEventTypes(List.of("FORM_SUBMITTED"));
+        reg.setActive(true);
+        return reg;
     }
 }
