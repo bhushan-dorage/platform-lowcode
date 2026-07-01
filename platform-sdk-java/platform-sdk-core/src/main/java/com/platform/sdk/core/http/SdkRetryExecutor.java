@@ -43,6 +43,12 @@ public class SdkRetryExecutor {
                 throw e;
             } catch (IOException e) {
                 lastNetworkError = e;
+            } catch (RuntimeException e) {
+                if (e.getCause() instanceof IOException cause) {
+                    lastNetworkError = cause;
+                } else {
+                    throw e;
+                }
             }
         }
         throw lastNetworkError != null ? lastNetworkError : new IOException("All retries exhausted");
