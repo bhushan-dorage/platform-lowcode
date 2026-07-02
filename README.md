@@ -332,6 +332,7 @@ platform-lowcode/
 | Document | Location |
 |---|---|
 | API Reference (OpenAPI 3.1) | [`docs/openapi.yaml`](docs/openapi.yaml) |
+| Architecture Decision Records | [`docs/adr/`](docs/adr/README.md) |
 | Operator Runbook | [`docs/operator-runbook.md`](docs/operator-runbook.md) |
 | Tenant Onboarding | [`docs/tenant-onboarding.md`](docs/tenant-onboarding.md) |
 | Release Notes v1.0.0 | [`docs/release-notes-v1.0.0.md`](docs/release-notes-v1.0.0.md) |
