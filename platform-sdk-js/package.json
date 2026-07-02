@@ -1,0 +1,25 @@
+{
+  "name": "@platform/sdk-js",
+  "version": "1.0.0",
+  "description": "JavaScript/TypeScript SDK for the Platform low-code engine",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc",
+    "test": "jest --passWithNoTests",
+    "lint": "eslint src --ext .ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5",
+    "@types/node": "^20.14.2",
+    "@types/jest": "^29.5.12",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.5",
+    "nock": "^13.5.4",
+    "@types/nock": "^9.1.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

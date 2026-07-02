@@ -58,6 +58,166 @@ jobs:
           REDIS_HOST: localhost
           REDIS_PORT: 6379
 
+  build-platform-audit-service:
+    needs: [build-platform-bom, build-platform-common]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+      - name: Install platform-bom
+        working-directory: platform-bom
+        run: mvn -B install -DskipTests
+      - name: Install platform-common
+        working-directory: platform-common
+        run: mvn -B install -DskipTests
+      - name: Test platform-audit-service
+        working-directory: platform-audit-service
+        run: mvn -B verify
+
+  build-platform-integration-service:
+    needs: [build-platform-bom, build-platform-common]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+      - name: Install platform-bom
+        working-directory: platform-bom
+        run: mvn -B install -DskipTests
+      - name: Install platform-common
+        working-directory: platform-common
+        run: mvn -B install -DskipTests
+      - name: Test platform-integration-service
+        working-directory: platform-integration-service
+        run: mvn -B verify
+
+  build-platform-notification-service:
+    needs: [build-platform-bom, build-platform-common]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+      - name: Install platform-bom
+        working-directory: platform-bom
+        run: mvn -B install -DskipTests
+      - name: Install platform-common
+        working-directory: platform-common
+        run: mvn -B install -DskipTests
+      - name: Test platform-notification-service
+        working-directory: platform-notification-service
+        run: mvn -B verify
+
+  build-platform-webhook-service:
+    needs: [build-platform-bom, build-platform-common]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+      - name: Install platform-bom
+        working-directory: platform-bom
+        run: mvn -B install -DskipTests
+      - name: Install platform-common
+        working-directory: platform-common
+        run: mvn -B install -DskipTests
+      - name: Test platform-webhook-service
+        working-directory: platform-webhook-service
+        run: mvn -B verify
+
+  build-portal-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: platform-portal-frontend/package-lock.json
+      - name: Install dependencies
+        working-directory: platform-portal-frontend
+        run: npm ci
+      - name: Run tests
+        working-directory: platform-portal-frontend
+        run: npm test
+      - name: Build
+        working-directory: platform-portal-frontend
+        run: npm run build
+
+  build-sdk-java:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+      - name: Build and test platform-sdk-java
+        working-directory: platform-sdk-java
+        run: mvn -B verify
+
+  build-sdk-js:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: platform-sdk-js/package-lock.json
+      - name: Install dependencies
+        working-directory: platform-sdk-js
+        run: npm ci
+      - name: Run tests
+        working-directory: platform-sdk-js
+        run: npm test
+      - name: Build
+        working-directory: platform-sdk-js
+        run: npm run build
+
+  build-load-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+      - name: Compile Gatling simulations
+        working-directory: platform-load-tests
+        run: mvn -B test-compile -DskipTests
+
+  build-e2e-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: platform-e2e-tests/package-lock.json
+      - name: Install dependencies
+        working-directory: platform-e2e-tests
+        run: npm ci
+      - name: Type-check E2E tests
+        working-directory: platform-e2e-tests
+        run: npx tsc --noEmit
+
   lint-infra:
     runs-on: ubuntu-latest
     steps:

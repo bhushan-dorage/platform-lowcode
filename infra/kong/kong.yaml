@@ -34,6 +34,30 @@ services:
           - /api/v1/audit
         strip_path: false
 
+  - name: integration-service
+    url: http://platform-integration-service:8087
+    routes:
+      - name: integration-routes
+        paths:
+          - /api/v1/integrations
+        strip_path: false
+
+  - name: notification-service
+    url: http://platform-notification-service:8088
+    routes:
+      - name: notification-routes
+        paths:
+          - /api/v1/notifications
+        strip_path: false
+
+  - name: webhook-service
+    url: http://platform-webhook-service:8089
+    routes:
+      - name: webhook-routes
+        paths:
+          - /api/v1/webhooks
+        strip_path: false
+
 plugins:
   - name: rate-limiting
     config:
