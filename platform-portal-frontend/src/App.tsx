@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import keycloak from './keycloak'
 import SimpleDashboard from './components/Dashboard/SimpleDashboard'
 import TaskInbox from './components/TaskInbox/TaskInbox'
+import PageView from './pages/PageView'
 
 export default function App() {
   const [authenticated, setAuthenticated] = useState<boolean | null>(null)
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<SimpleDashboard />} />
         <Route path="/tasks" element={<TaskInbox />} />
+        <Route path="/pages/:pageKey" element={<PageView />} />
       </Routes>
     </BrowserRouter>
   )
