@@ -2,6 +2,7 @@ package com.platform.sdk.core.http;
 
 import com.platform.sdk.core.exception.RateLimitException;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 import java.io.IOException;
 import java.util.function.Supplier;
@@ -31,18 +32,16 @@ public class SdkRetryExecutor {
                 int code = response.code();
                 if (code == 429) {
                     String retryAfter = response.header("Retry-After", "60");
-                    response.close();
+                    closeQuietly(response);
                     throw new RateLimitException("Rate limited by server", Long.parseLong(retryAfter));
                 }
                 if (code >= 500 && attempt < maxRetries) {
-                    response.close();
+                    closeQuietly(response);
                     continue;
                 }
                 return response;
             } catch (RateLimitException e) {
                 throw e;
-            } catch (IOException e) {
-                lastNetworkError = e;
             } catch (RuntimeException e) {
                 if (e.getCause() instanceof IOException cause) {
                     lastNetworkError = cause;
@@ -52,5 +51,10 @@ public class SdkRetryExecutor {
             }
         }
         throw lastNetworkError != null ? lastNetworkError : new IOException("All retries exhausted");
+    }
+
+    private static void closeQuietly(Response response) {
+        ResponseBody body = response.body();
+        if (body != null) body.close();
     }
 }
