@@ -1,6 +1,6 @@
 # Platform Low-Code Workflow Engine
 
-A production-grade, multi-tenant low-code platform for building, deploying, and operating BPMN-driven workflows with dynamic forms, data modeling, role-based access control, and full observability.
+A production-grade, multi-tenant low-code platform for building, deploying, and operating BPMN-driven workflows with dynamic forms, metadata-driven pages, data modeling, role-based access control, and full observability.
 
 ---
 
@@ -14,37 +14,42 @@ A production-grade, multi-tenant low-code platform for building, deploying, and 
 │  │  Portal Frontend    │  │  Studio Frontend │  │  External Systems     │  │
 │  │  React 18 + PKCE   │  │  React + BPMN-JS │  │  platform-sdk-java    │  │
 │  │  Task Inbox · Forms │  │  Process Design  │  │  @platform/sdk-js     │  │
+│  │  Page Builder       │  │  Form Builder    │  │                       │  │
 │  └──────────┬──────────┘  └────────┬─────────┘  └──────────┬────────────┘  │
-└─────────────┼────────────────────-─┼────────────────────────┼───────────────┘
-              │                      │                         │
-              ▼                      ▼                         ▼
+└─────────────┼─────────────────────┼────────────────────────┼───────────────┘
+              │                     │                         │
+              ▼                     ▼                         ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                     KONG API GATEWAY  :8000                                 │
 │              Rate-Limiting · Correlation-ID · JWT Auth · TLS                │
-└──────┬────────┬──────────┬────────┬────────┬───────┬──────────┬────────────┘
-       │        │          │        │        │       │          │
-       ▼        ▼          ▼        ▼        ▼       ▼          ▼
-┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐
-│ Workflow │ │  Form    │ │  Data    │ │Entitle-  │ │  Audit   │ │Integrat- │
-│ Engine   │ │ Service  │ │ Service  │ │ments     │ │ Service  │ │  ion     │
-│          │ │          │ │          │ │ Service  │ │          │ │ Service  │
-│ Flowable │ │JSON      │ │Multi-    │ │RBAC+ABAC │ │Hash-     │ │ Apache   │
-│ BPMN     │ │Schema    │ │tenant    │ │Field     │ │chain     │ │ Camel    │
-│ SLA Mon. │ │Versioned │ │Entities  │ │Masking   │ │SIEM      │ │ 5 connec.│
-│ Redisson │ │Submit    │ │          │ │          │ │Compliance│ │          │
-│ :8083    │ │ :8084    │ │ :8085    │ │ :8085    │ │ :8086    │ │ :8087    │
-└────┬─────┘ └────┬─────┘ └──────────┘ └──────────┘ └──────────┘ └──────────┘
-     │             │
-     ▼             ▼
-┌──────────┐ ┌──────────┐
-│Notificat-│ │ Webhook  │
-│  ion     │ │ Service  │
-│ Service  │ │          │
-│Email/SMS/│ │HMAC-     │
-│Push/     │ │SHA256    │
-│In-App    │ │5-attempt │
-│ :8088    │ │ :8089    │
-└──────────┘ └──────────┘
+└──┬──────┬──────┬────────┬────────┬────────┬───────┬──────────┬─────────────┘
+   │      │      │        │        │        │       │          │
+   ▼      ▼      ▼        ▼        ▼        ▼       ▼          ▼
+
+── CORE PRODUCT ─────────────────────────────────────────────────────────────
+
+┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐ ┌────────────────────────────┐
+│Workflow│ │  Form  │ │  Page  │ │  Data  │ │     Entitlements Service   │
+│ Engine │ │Service │ │Service │ │Service │ │                            │
+│        │ │        │ │        │ │        │ │  RBAC + ABAC · Field Mask  │
+│Flowable│ │JSON    │ │Metadata│ │Multi-  │ │  Permission enforcement    │
+│BPMN    │ │Schema  │ │pages & │ │tenant  │ │                            │
+│SLA Mon.│ │Version.│ │widgets │ │Entities│ │                            │
+│Redisson│ │Submit  │ │REST API│ │        │ │                            │
+│ :8083  │ │ :8084  │ │ :8085  │ │ :8086  │ │          :8087             │
+└────────┘ └────────┘ └────────┘ └────────┘ └────────────────────────────┘
+
+── CROSS-CUTTING SERVICES ───────────────────────────────────────────────────
+
+┌────────┐ ┌────────────────────┐ ┌──────────────┐ ┌────────────────────┐
+│ Audit  │ │ Integration Service│ │ Notification │ │  Webhook Service   │
+│Service │ │                    │ │   Service    │ │                    │
+│        │ │ Apache Camel 4     │ │              │ │  HMAC-SHA256       │
+│Hash-   │ │ Connector SPI:     │ │ Email · SMS  │ │  Signed Delivery   │
+│chain   │ │ HTTP · JDBC · SFTP │ │ Push · InApp │ │  5-attempt retry   │
+│SIEM    │ │ Email · Slack      │ │ Kafka-driven │ │  Kafka-driven      │
+│ :8088  │ │       :8089        │ │    :8090     │ │      :8091         │
+└────────┘ └────────────────────┘ └──────────────┘ └────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                          INFRASTRUCTURE LAYER                               │
@@ -72,19 +77,19 @@ A production-grade, multi-tenant low-code platform for building, deploying, and 
 |---|---|---|---|
 | `platform-workflow-engine` | Java 21 / Spring Boot 3 / Flowable | 8083 | BPMN process execution, human task management, distributed locking (Redisson), SLA monitoring |
 | `platform-form-service` | Java 21 / Spring Boot 3 | 8084 | JSON Schema form definitions, versioning, validation, submission events |
-| `platform-data-service` | Java 21 / Spring Boot 3 | 8085 | Multi-tenant entity modeling and CRUD with PostgreSQL |
-| `platform-entitlements-service` | Java 21 / Spring Boot 3 | 8085 | RBAC + ABAC policy engine, field-level masking, permission enforcement |
-| `platform-rules-service` | Java 21 / Spring Boot 3 | — | DMN business rule evaluation |
-| `platform-audit-service` | Java 21 / Spring Boot 3 | 8086 | SHA-256 hash-chained audit trail, SIEM export (CEF/LEEF/JSON), compliance reports (SOC2/ISO27001/GDPR/HIPAA), ClickHouse store |
-| `platform-integration-service` | Java 21 / Spring Boot 3 / Camel | 8087 | Apache Camel dynamic routes, HTTP/JDBC/Kafka/SFTP/Slack connectors |
-| `platform-notification-service` | Java 21 / Spring Boot 3 | 8088 | Kafka-driven multi-channel delivery: email, SMS, push, in-app |
-| `platform-webhook-service` | Java 21 / Spring Boot 3 | 8089 | HMAC-SHA256 signed outbound webhooks, 5-attempt exponential-backoff retry |
+| `platform-page-service` | Java 21 / Spring Boot 3 | 8085 | Metadata-driven page definitions — JSONB schema, widget catalog, publish lifecycle |
+| `platform-data-service` | Java 21 / Spring Boot 3 | 8086 | Multi-tenant entity modeling and CRUD with PostgreSQL |
+| `platform-entitlements-service` | Java 21 / Spring Boot 3 | 8087 | RBAC + ABAC policy engine, field-level masking, permission enforcement |
+| `platform-audit-service` | Java 21 / Spring Boot 3 | 8088 | SHA-256 hash-chained audit trail, SIEM export (CEF/LEEF/JSON), compliance reports (SOC2/ISO27001/GDPR/HIPAA), ClickHouse store |
+| `platform-integration-service` | Java 21 / Spring Boot 3 / Camel | 8089 | Connector SPI with 5 pluggable providers: HTTP, JDBC, SFTP, Email, Slack — all building real Apache Camel routes |
+| `platform-notification-service` | Java 21 / Spring Boot 3 | 8090 | Kafka-driven multi-channel delivery: email, SMS, push, in-app |
+| `platform-webhook-service` | Java 21 / Spring Boot 3 | 8091 | HMAC-SHA256 signed outbound webhooks, 5-attempt exponential-backoff retry |
 | `platform-studio-backend` | Java 21 / Spring Boot 3 | — | Git-backed artifact store, BPMN/form deployment pipeline |
-| `platform-portal-frontend` | React 18 / TypeScript / Vite | 3001 | SPA: Keycloak PKCE login, real-time task inbox, dynamic form rendering |
+| `platform-portal-frontend` | React 18 / TypeScript / Vite | 3001 | SPA: Keycloak PKCE login, real-time task inbox, dynamic form rendering, metadata-driven page renderer (`/pages/:pageKey`) |
 | `platform-studio-frontend` | React 18 / BPMN-JS / DMN-JS | — | Visual process designer, drag-and-drop form builder |
 | `platform-sdk-java` | Java 21 / Maven multi-module | — | `platform-sdk-core`, `platform-sdk-process`, `platform-sdk-task`, `spring-boot-starter` |
 | `platform-sdk-js` | TypeScript / Node ≥ 18 | — | `@platform/sdk-js` — entity API client, code generator |
-| `platform-common` | Java 21 | — | Shared domain types, audit events, Kafka schema, security utils |
+| `platform-common` | Java 21 | — | Shared response envelopes, cursor pagination, tenant context, Kafka producer |
 | `platform-bom` | Maven BOM | — | Centralized dependency version management |
 | `platform-load-tests` | Scala / Gatling 3.9.5 | — | 4 load simulations (burst, inbox, claim/complete, form submit) |
 | `platform-e2e-tests` | TypeScript / Playwright 1.44 | — | End-to-end browser tests for portal and studio flows |
@@ -95,13 +100,13 @@ A production-grade, multi-tenant low-code platform for building, deploying, and 
 
 ### Core Runtime
 - **Java 21** — all backend services
-- **Spring Boot 3.3** — web, security, actuator, data JPA
+- **Spring Boot 3.3** — web, security, actuator, data JPA, validation
 - **Flowable 7** — BPMN 2.0 process engine
-- **Apache Camel 4** — integration routes
+- **Apache Camel 4** — pluggable integration routes (HTTP, JDBC, SFTP via camel-ftp, Email, Slack)
 - **Redisson** — distributed locks over Redis
 
 ### Data Stores
-- **PostgreSQL 16** — primary relational store (all services)
+- **PostgreSQL 16** — primary relational store (all services); schema-per-tenant multi-tenancy
 - **Redis 7** — session cache, distributed locks
 - **ClickHouse 23.12** — append-only audit event store
 - **Kafka 7.6 (Confluent)** — event streaming with Schema Registry
@@ -115,6 +120,7 @@ A production-grade, multi-tenant low-code platform for building, deploying, and 
 - **React 18** + **TypeScript 5** + **Vite 5**
 - **BPMN-JS / DMN-JS** — process and decision model visualization
 - **@rjsf/core** — JSON Schema-driven form rendering
+- **PageRenderer** — metadata-driven page engine: KPI, table, chart, form, text widgets
 
 ### Observability
 - **Prometheus + Grafana 10** — metrics and dashboards
@@ -122,7 +128,7 @@ A production-grade, multi-tenant low-code platform for building, deploying, and 
 - **Spring Boot Actuator** — health, info, metrics endpoints
 
 ### Testing
-- **JUnit 5 + Mockito 5 + AssertJ** — unit/integration tests
+- **JUnit 5 + Mockito 5 + AssertJ** — unit and integration tests
 - **Gatling 3.9.5 (Scala)** — load tests (500 VU burst, 200 VU inbox, 100 VU task claim, 300 VU form submit)
 - **Playwright 1.44 (TypeScript)** — E2E browser tests
 - **Vitest + Testing Library** — React component tests
@@ -149,7 +155,7 @@ A production-grade, multi-tenant low-code platform for building, deploying, and 
 docker compose up -d
 ```
 
-Services start in dependency order. Wait for Keycloak (~60s) before running services.
+Services start in dependency order. Wait for Keycloak (~60 s) before running services.
 
 | UI | URL |
 |---|---|
@@ -161,15 +167,16 @@ Services start in dependency order. Wait for Keycloak (~60s) before running serv
 | Grafana | http://localhost:3000 — admin / admin |
 | Jaeger | http://localhost:16686 |
 
-### Build all Java services
+### Build a service
 
 ```bash
 # Install shared dependencies first
 mvn -B install -DskipTests -f platform-bom/pom.xml
 mvn -B install -DskipTests -f platform-common/pom.xml
 
-# Build any service
+# Build any service (example)
 mvn -B verify -f platform-workflow-engine/pom.xml
+mvn -B verify -f platform-page-service/pom.xml
 ```
 
 ### Build and run the portal frontend
@@ -213,17 +220,64 @@ curl -H "Authorization: Bearer $TOKEN" http://localhost:8000/api/v1/processes
 
 ### Key endpoints
 
-| Method | Path | Description |
-|---|---|---|
-| `POST` | `/api/v1/processes` | Start a process instance |
-| `GET` | `/api/v1/tasks?assignee={user}` | List tasks in inbox |
-| `POST` | `/api/v1/tasks/{id}/claim` | Claim a task |
-| `POST` | `/api/v1/tasks/{id}/complete` | Complete a task with variables |
-| `GET` | `/api/v1/forms/{key}/latest` | Get published form schema |
-| `POST` | `/api/v1/forms/{key}/submissions` | Submit a form |
-| `GET` | `/api/v1/entities/{type}` | List entity records |
-| `GET` | `/api/v1/audit/events` | Query immutable audit log |
-| `POST` | `/api/v1/webhooks/registrations` | Register a webhook endpoint |
+| Method | Path | Service | Description |
+|---|---|---|---|
+| `POST` | `/api/v1/processes` | workflow-engine | Start a process instance |
+| `GET` | `/api/v1/tasks?assignee={user}` | workflow-engine | List tasks in inbox |
+| `POST` | `/api/v1/tasks/{id}/claim` | workflow-engine | Claim a task |
+| `POST` | `/api/v1/tasks/{id}/complete` | workflow-engine | Complete a task with variables |
+| `GET` | `/api/v1/forms/{key}/latest` | form-service | Get published form schema |
+| `POST` | `/api/v1/forms/{key}/submissions` | form-service | Submit a form |
+| `POST` | `/api/v1/pages` | page-service | Create a page definition |
+| `GET` | `/api/v1/pages/{key}` | page-service | Get page schema (used by `PageRenderer`) |
+| `POST` | `/api/v1/pages/{key}/publish` | page-service | Publish a page (DRAFT → PUBLISHED) |
+| `GET` | `/api/v1/entities/{type}` | data-service | List entity records |
+| `GET` | `/api/v1/audit/events` | audit-service | Query immutable audit log |
+| `POST` | `/api/v1/webhooks/registrations` | webhook-service | Register a webhook endpoint |
+
+---
+
+## Page Schema Format
+
+A page definition stores a JSONB schema describing sections and widgets:
+
+```json
+{
+  "version": "1.0",
+  "title": "Order Management",
+  "description": "Monitor and manage customer orders",
+  "layout": {
+    "type": "sections",
+    "sections": [
+      {
+        "id": "metrics",
+        "title": "Key Metrics",
+        "columns": 3,
+        "widgets": [
+          { "id": "w1", "type": "kpi", "colSpan": 1, "title": "Open Orders",
+            "config": { "label": "Open Orders", "dataSource": { "url": "/api/v1/entities/order", "valueField": "count" } } },
+          { "id": "w2", "type": "chart", "colSpan": 2, "title": "Orders by Day",
+            "config": { "chartType": "bar", "dataSource": { "url": "/api/v1/metrics/orders-by-day", "labelField": "day", "valueField": "count" } } }
+        ]
+      },
+      {
+        "id": "actions",
+        "columns": 2,
+        "widgets": [
+          { "id": "w3", "type": "form", "colSpan": 1, "title": "New Order",
+            "config": { "formKey": "create-order", "submitUrl": "/api/v1/entities/order" } },
+          { "id": "w4", "type": "text", "colSpan": 1,
+            "config": { "content": "Orders after 3 PM EST ship next day.", "variant": "warning" } }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Widget types**: `kpi` · `table` · `form` (reuses `platform-form-service` definitions) · `chart` · `text`
+
+The portal renders any published page at `/pages/{pageKey}` — no code deployment required for new screens.
 
 ---
 
@@ -253,14 +307,14 @@ Kong Gateway  ──── JWT validated ────►  Backend Service
 
 ## CI / CD
 
-GitHub Actions runs 12 parallel jobs on every push to `main` or `claude/**` branches and on pull requests targeting `main`.
+GitHub Actions runs parallel jobs on every push to `main` or `claude/**` branches and on pull requests targeting `main`.
 
 | Job | What it does |
 |---|---|
 | `build-platform-bom` | Installs the Maven BOM |
 | `build-platform-common` | Tests shared library (Postgres + Redis services) |
 | `build-platform-audit-service` | Builds and tests audit service |
-| `build-platform-integration-service` | Builds and tests integration service |
+| `build-platform-integration-service` | Builds integration service — 15 tests including Connector SPI |
 | `build-platform-notification-service` | Builds and tests notification service |
 | `build-platform-webhook-service` | Builds and tests webhook service |
 | `build-portal-frontend` | `npm ci` → vitest → `tsc && vite build` |
@@ -302,23 +356,25 @@ platform-lowcode/
 │   └── chaos/                      # Chaos test scripts
 ├── docs/
 │   ├── openapi.yaml                # Full OpenAPI 3.1 specification
+│   ├── adr/                        # Architecture Decision Records (ADR-0001 – ADR-0010)
 │   ├── operator-runbook.md         # Day-2 operations guide
 │   ├── tenant-onboarding.md        # Tenant setup playbook
-│   └── release-notes-v1.0.0.md    # v1.0.0 release notes
+│   ├── release-notes-v1.0.0.md    # v1.0.0 release notes
+│   └── release-notes-v1.1.0.md    # v1.1.0 release notes
 ├── platform-bom/                   # Maven BOM (dependency versions)
-├── platform-common/                # Shared library
-├── platform-workflow-engine/       # BPMN runtime
-├── platform-form-service/          # Form management
-├── platform-data-service/          # Entity store
-├── platform-entitlements-service/  # Access control
-├── platform-rules-service/         # DMN rules
-├── platform-audit-service/         # Immutable audit trail
-├── platform-integration-service/   # Apache Camel connectors
-├── platform-notification-service/  # Multi-channel notifications
-├── platform-webhook-service/       # Outbound webhooks
-├── platform-studio-backend/        # Artifact store / deployment
-├── platform-studio-frontend/       # Visual process designer
-├── platform-portal-frontend/       # End-user portal SPA
+├── platform-common/                # Shared library (envelopes, pagination, tenant)
+├── platform-workflow-engine/       # BPMN runtime + task management
+├── platform-form-service/          # JSON Schema form management
+├── platform-page-service/          # Metadata-driven page definitions
+├── platform-data-service/          # Multi-tenant entity store
+├── platform-entitlements-service/  # RBAC + ABAC access control
+├── platform-audit-service/         # Immutable hash-chained audit trail
+├── platform-integration-service/   # Apache Camel — Connector SPI + 5 providers
+├── platform-notification-service/  # Kafka-driven multi-channel notifications
+├── platform-webhook-service/       # HMAC-SHA256 signed outbound webhooks
+├── platform-studio-backend/        # Git-backed artifact store + deployment
+├── platform-studio-frontend/       # Visual process and form designer
+├── platform-portal-frontend/       # End-user portal SPA + PageRenderer
 ├── platform-sdk-java/              # Java SDK (Maven multi-module)
 ├── platform-sdk-js/                # TypeScript/JS SDK
 ├── platform-load-tests/            # Gatling simulations
@@ -332,10 +388,11 @@ platform-lowcode/
 | Document | Location |
 |---|---|
 | API Reference (OpenAPI 3.1) | [`docs/openapi.yaml`](docs/openapi.yaml) |
-| Architecture Decision Records | [`docs/adr/`](docs/adr/README.md) |
+| Architecture Decision Records | [`docs/adr/`](docs/adr/README.md) (ADR-0001 – ADR-0010) |
 | Operator Runbook | [`docs/operator-runbook.md`](docs/operator-runbook.md) |
 | Tenant Onboarding | [`docs/tenant-onboarding.md`](docs/tenant-onboarding.md) |
 | Release Notes v1.0.0 | [`docs/release-notes-v1.0.0.md`](docs/release-notes-v1.0.0.md) |
+| Release Notes v1.1.0 | [`docs/release-notes-v1.1.0.md`](docs/release-notes-v1.1.0.md) |
 
 ---
 

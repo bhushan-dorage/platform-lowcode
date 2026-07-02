@@ -1,19 +1,20 @@
-# Platform Operator Runbook v1.0.0
+# Platform Operator Runbook v1.1.0
 
 ## Architecture Overview
 
-The platform consists of 10 microservices behind a Kong API gateway:
+The platform consists of 11 microservices behind a Kong API gateway:
 
 | Service | Port | Technology | Depends On |
 |---------|------|-----------|-----------|
 | platform-workflow-engine | 8080 | Spring Boot, Flowable | PostgreSQL, Redis, Kafka |
 | platform-form-service | 8080 | Spring Boot | PostgreSQL, Kafka |
+| platform-page-service | 8080 | Spring Boot | PostgreSQL |
 | platform-data-service | 8080 | Spring Boot | PostgreSQL, Kafka |
 | platform-entitlements-service | 8080 | Spring Boot | PostgreSQL |
-| platform-audit-service | 8086 | Spring Boot | ClickHouse, Kafka |
-| platform-integration-service | 8087 | Spring Boot, Camel | PostgreSQL |
-| platform-notification-service | 8088 | Spring Boot | PostgreSQL, Kafka, SMTP |
-| platform-webhook-service | 8089 | Spring Boot | PostgreSQL, Kafka |
+| platform-audit-service | 8080 | Spring Boot | ClickHouse, Kafka |
+| platform-integration-service | 8080 | Spring Boot, Camel 4 | PostgreSQL |
+| platform-notification-service | 8080 | Spring Boot | PostgreSQL, Kafka, SMTP |
+| platform-webhook-service | 8080 | Spring Boot | PostgreSQL, Kafka |
 | platform-portal-frontend | 80 | React/nginx | Kong |
 | kong | 8000/8001 | Kong 3.6 | – |
 
