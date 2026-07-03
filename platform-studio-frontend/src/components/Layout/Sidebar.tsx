@@ -10,6 +10,7 @@ const navItems: NavItem[] = [
   { label: 'Form Designer', path: '/forms', icon: '📝' },
   { label: 'Data Modeler', path: '/data', icon: '🗄️' },
   { label: 'Role Manager', path: '/roles', icon: '🔐' },
+  { label: 'Page Builder', path: '/pages', icon: '⊞' },
 ];
 
 const sidebarStyle: React.CSSProperties = {
