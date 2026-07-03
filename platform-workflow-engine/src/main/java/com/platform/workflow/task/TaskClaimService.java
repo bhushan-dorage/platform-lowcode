@@ -16,16 +16,20 @@ public class TaskClaimService {
 
     private final RedissonClient redissonClient;
 
+    private static final int WAIT_TIME_SECONDS = 5;
+    private static final int LEASE_TIME_SECONDS = 30;
+
     /**
      * Acquires a Redlock on the task before executing the claim action.
-     * Lock key: {tenantId}:task-lock:{taskId}, TTL 5s, wait up to 5s.
+     * Lock key: {tenantId}:task-lock:{taskId}, TTL 30s, wait up to 5s.
+     * 30s lease gives the downstream Flowable claim enough runway to complete under load.
      */
     public void claimWithLock(String taskId, String userId, Runnable claimAction) {
         String lockKey = TenantContext.getTenantId() + ":task-lock:" + taskId;
         RLock lock = redissonClient.getLock(lockKey);
         boolean acquired = false;
         try {
-            acquired = lock.tryLock(5, 5, TimeUnit.SECONDS);
+            acquired = lock.tryLock(WAIT_TIME_SECONDS, LEASE_TIME_SECONDS, TimeUnit.SECONDS);
             if (!acquired) {
                 log.warn("Failed to acquire claim lock taskId={} userId={}", taskId, userId);
                 throw new TaskAlreadyClaimedException(taskId);
@@ -33,7 +37,7 @@ public class TaskClaimService {
             claimAction.run();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new TaskAlreadyClaimedException(taskId);
+            throw new IllegalStateException("Interrupted while acquiring claim lock for taskId=" + taskId, e);
         } finally {
             if (acquired && lock.isHeldByCurrentThread()) {
                 lock.unlock();

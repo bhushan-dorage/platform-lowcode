@@ -60,22 +60,28 @@ public class ProcessService {
     @Timed(value = "workflow.process.list")
     public CursorPage<ProcessInstanceDto> listProcessInstances(String cursor, int pageSize) {
         String tenantId = TenantContext.getTenantId();
-        var query = historyService.createHistoricProcessInstanceQuery()
-                .processInstanceTenantId(tenantId)
-                .orderByProcessInstanceId().asc();
 
-        List<HistoricProcessInstance> results = query.listPage(0, pageSize + 1);
-
-        // Apply cursor filter in-memory — Flowable's API doesn't expose id-greater-than
+        // Cursor encodes the numeric offset (start position) in the ordered result set.
+        // Flowable's HistoricProcessInstanceQuery does not support keyset (id-greater-than)
+        // filtering natively, so we use offset-based pagination with listPage(firstResult, max).
+        int firstResult = 0;
         if (cursor != null) {
-            results = results.stream()
-                    .filter(p -> p.getId().compareTo(cursor) > 0)
-                    .toList();
+            try {
+                firstResult = Integer.parseInt(cursor);
+            } catch (NumberFormatException ex) {
+                throw new IllegalArgumentException("Invalid pagination cursor: " + cursor);
+            }
         }
+
+        List<HistoricProcessInstance> results = historyService
+                .createHistoricProcessInstanceQuery()
+                .processInstanceTenantId(tenantId)
+                .orderByProcessInstanceId().asc()
+                .listPage(firstResult, pageSize + 1);
 
         boolean hasMore = results.size() > pageSize;
         List<HistoricProcessInstance> page = hasMore ? results.subList(0, pageSize) : results;
-        String nextCursor = hasMore ? page.get(page.size() - 1).getId() : null;
+        String nextCursor = hasMore ? String.valueOf(firstResult + pageSize) : null;
 
         List<ProcessInstanceDto> dtos = page.stream().map(this::toDto).toList();
         return CursorPage.of(dtos, nextCursor, hasMore, pageSize);

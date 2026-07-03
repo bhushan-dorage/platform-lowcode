@@ -13,6 +13,7 @@ import com.platform.data.exception.ResourceNotFoundException;
 import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -86,14 +87,28 @@ public class EntityService {
     public CursorPage<Map<String, Object>> listRecords(String entityType, String cursor, int pageSize) {
         String tenantId = TenantContext.getTenantId();
         requireDefinition(tenantId, entityType);
-        List<EntityRecord> results = cursor != null
-                ? recordRepo.findByTenantIdAndEntityTypeAndArchivedAtIsNullAndIdGreaterThanOrderByIdAsc(
-                        tenantId, entityType, UUID.fromString(cursor))
-                : recordRepo.findByTenantIdAndEntityTypeAndArchivedAtIsNullOrderByIdAsc(tenantId, entityType);
 
-        List<EntityRecord> page = results.stream().limit(pageSize + 1L).toList();
-        boolean hasMore = page.size() > pageSize;
-        List<EntityRecord> items = hasMore ? page.subList(0, pageSize) : page;
+        // Fetch pageSize+1 rows at the DB level so we can determine hasMore without
+        // loading the entire table into memory first.
+        var limit = PageRequest.of(0, pageSize + 1);
+
+        UUID cursorId = null;
+        if (cursor != null) {
+            try {
+                cursorId = UUID.fromString(cursor);
+            } catch (IllegalArgumentException ex) {
+                throw new IllegalArgumentException("Invalid pagination cursor: " + cursor, ex);
+            }
+        }
+
+        List<EntityRecord> results = cursorId != null
+                ? recordRepo.findByTenantIdAndEntityTypeAndArchivedAtIsNullAndIdGreaterThanOrderByIdAsc(
+                        tenantId, entityType, cursorId, limit)
+                : recordRepo.findByTenantIdAndEntityTypeAndArchivedAtIsNullOrderByIdAsc(
+                        tenantId, entityType, limit);
+
+        boolean hasMore = results.size() > pageSize;
+        List<EntityRecord> items = hasMore ? results.subList(0, pageSize) : results;
         String nextCursor = hasMore ? items.get(items.size() - 1).getId().toString() : null;
         List<Map<String, Object>> dtos = items.stream().map(r -> {
             Map<String, Object> m = fromJson(r.getData());
