@@ -77,7 +77,7 @@ A production-grade, multi-tenant low-code platform for building, deploying, and 
 |---|---|---|---|
 | `platform-workflow-engine` | Java 21 / Spring Boot 3 / Flowable | 8083 | BPMN process execution, human task management, distributed locking (Redisson), SLA monitoring |
 | `platform-form-service` | Java 21 / Spring Boot 3 | 8084 | JSON Schema form definitions, versioning, validation, submission events |
-| `platform-page-service` | Java 21 / Spring Boot 3 | 8085 | Metadata-driven page definitions — JSONB schema, widget catalog, publish lifecycle |
+| `platform-page-service` | Java 21 / Spring Boot 3 | 8085 | Metadata-driven page definitions — JSONB schema, widget catalog, publish lifecycle; AI-assisted generation via Claude API |
 | `platform-data-service` | Java 21 / Spring Boot 3 | 8086 | Multi-tenant entity modeling and CRUD with PostgreSQL |
 | `platform-entitlements-service` | Java 21 / Spring Boot 3 | 8087 | RBAC + ABAC policy engine, field-level masking, permission enforcement |
 | `platform-audit-service` | Java 21 / Spring Boot 3 | 8088 | SHA-256 hash-chained audit trail, SIEM export (CEF/LEEF/JSON), compliance reports (SOC2/ISO27001/GDPR/HIPAA), ClickHouse store |
@@ -121,6 +121,7 @@ A production-grade, multi-tenant low-code platform for building, deploying, and 
 - **BPMN-JS / DMN-JS** — process and decision model visualization
 - **@rjsf/core** — JSON Schema-driven form rendering
 - **PageRenderer** — metadata-driven page engine: KPI, table, chart, form, text widgets
+- **PageGenerator** — AI-assisted page creation: natural language prompt → PageSchema via Claude API (`claude-opus-4-8`)
 
 ### Observability
 - **Prometheus + Grafana 10** — metrics and dashboards
@@ -228,6 +229,7 @@ curl -H "Authorization: Bearer $TOKEN" http://localhost:8000/api/v1/processes
 | `POST` | `/api/v1/tasks/{id}/complete` | workflow-engine | Complete a task with variables |
 | `GET` | `/api/v1/forms/{key}/latest` | form-service | Get published form schema |
 | `POST` | `/api/v1/forms/{key}/submissions` | form-service | Submit a form |
+| `POST` | `/api/v1/pages/generate` | page-service | AI-generate a page definition from a natural language prompt |
 | `POST` | `/api/v1/pages` | page-service | Create a page definition |
 | `GET` | `/api/v1/pages/{key}` | page-service | Get page schema (used by `PageRenderer`) |
 | `POST` | `/api/v1/pages/{key}/publish` | page-service | Publish a page (DRAFT → PUBLISHED) |
@@ -387,8 +389,9 @@ platform-lowcode/
 
 | Document | Location |
 |---|---|
+| **User Manual** (Business Analysts) | [`docs/user-manual.html`](docs/user-manual.html) |
 | API Reference (OpenAPI 3.1) | [`docs/openapi.yaml`](docs/openapi.yaml) |
-| Architecture Decision Records | [`docs/adr/`](docs/adr/README.md) (ADR-0001 – ADR-0010) |
+| Architecture Decision Records | [`docs/adr/`](docs/adr/README.md) (ADR-0001 – ADR-0011) |
 | Operator Runbook | [`docs/operator-runbook.md`](docs/operator-runbook.md) |
 | Tenant Onboarding | [`docs/tenant-onboarding.md`](docs/tenant-onboarding.md) |
 | Release Notes v1.0.0 | [`docs/release-notes-v1.0.0.md`](docs/release-notes-v1.0.0.md) |
