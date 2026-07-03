@@ -3,9 +3,12 @@ package com.platform.page.page;
 import com.platform.common.web.CursorPage;
 import com.platform.common.web.StandardResponseEnvelope;
 import com.platform.page.page.dto.CreatePageRequest;
+import com.platform.page.page.dto.GeneratePageRequest;
+import com.platform.page.page.dto.GeneratedPageResponse;
 import com.platform.page.page.dto.PageDefinitionDto;
 import com.platform.page.page.dto.PublishPageRequest;
 import com.platform.page.page.dto.UpdatePageRequest;
+import com.platform.page.page.service.PageGenerationService;
 import com.platform.page.page.service.PageService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -22,6 +25,14 @@ import org.springframework.web.bind.annotation.*;
 public class PageController {
 
     private final PageService pageService;
+    private final PageGenerationService pageGenerationService;
+
+    @PostMapping("/generate")
+    public ResponseEntity<StandardResponseEnvelope<GeneratedPageResponse>> generatePage(
+            @Valid @RequestBody GeneratePageRequest req,
+            HttpServletRequest http) {
+        return ResponseEntity.ok(ok(pageGenerationService.generate(req), http));
+    }
 
     @PostMapping
     public ResponseEntity<StandardResponseEnvelope<PageDefinitionDto>> createPage(

@@ -4,6 +4,7 @@ import keycloak from './keycloak'
 import SimpleDashboard from './components/Dashboard/SimpleDashboard'
 import TaskInbox from './components/TaskInbox/TaskInbox'
 import PageView from './pages/PageView'
+import PageGenerator from './pages/PageGenerator'
 
 export default function App() {
   const [authenticated, setAuthenticated] = useState<boolean | null>(null)
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="/dashboard" element={<SimpleDashboard />} />
         <Route path="/tasks" element={<TaskInbox />} />
         <Route path="/pages/:pageKey" element={<PageView />} />
+        <Route path="/generate" element={<PageGenerator />} />
       </Routes>
     </BrowserRouter>
   )
