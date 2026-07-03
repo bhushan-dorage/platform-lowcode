@@ -19,6 +19,7 @@ Each ADR documents a significant architectural decision: the context that forced
 | [0009](0009-connector-spi.md) | Connector SPI for Integration Service | Accepted |
 | [0010](0010-metadata-driven-page-builder.md) | Metadata-Driven Page Builder | Accepted |
 | [0011](0011-claude-ai-page-generation.md) | Claude API for AI-Assisted Page Generation | Accepted |
+| [0012](0012-visual-page-builder.md) | Visual Drag-and-Drop Page Builder | Accepted |
 
 ## Format
 

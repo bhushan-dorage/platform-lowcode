@@ -86,7 +86,7 @@ A production-grade, multi-tenant low-code platform for building, deploying, and 
 | `platform-webhook-service` | Java 21 / Spring Boot 3 | 8091 | HMAC-SHA256 signed outbound webhooks, 5-attempt exponential-backoff retry |
 | `platform-studio-backend` | Java 21 / Spring Boot 3 | — | Git-backed artifact store, BPMN/form deployment pipeline |
 | `platform-portal-frontend` | React 18 / TypeScript / Vite | 3001 | SPA: Keycloak PKCE login, real-time task inbox, dynamic form rendering, metadata-driven page renderer (`/pages/:pageKey`) |
-| `platform-studio-frontend` | React 18 / BPMN-JS / DMN-JS | — | Visual process designer, drag-and-drop form builder |
+| `platform-studio-frontend` | React 18 / BPMN-JS / DMN-JS | — | Visual process designer, drag-and-drop form builder, and visual drag-and-drop Page Builder |
 | `platform-sdk-java` | Java 21 / Maven multi-module | — | `platform-sdk-core`, `platform-sdk-process`, `platform-sdk-task`, `spring-boot-starter` |
 | `platform-sdk-js` | TypeScript / Node ≥ 18 | — | `@platform/sdk-js` — entity API client, code generator |
 | `platform-common` | Java 21 | — | Shared response envelopes, cursor pagination, tenant context, Kafka producer |
@@ -122,6 +122,7 @@ A production-grade, multi-tenant low-code platform for building, deploying, and 
 - **@rjsf/core** — JSON Schema-driven form rendering
 - **PageRenderer** — metadata-driven page engine: KPI, table, chart, form, text widgets
 - **PageGenerator** — AI-assisted page creation: natural language prompt → PageSchema via Claude API (`claude-opus-4-8`)
+- **Visual Page Builder** — drag-and-drop Studio tool for teams without AI access; produces the same PageSchema, no LLM required
 
 ### Observability
 - **Prometheus + Grafana 10** — metrics and dashboards
@@ -358,7 +359,7 @@ platform-lowcode/
 │   └── chaos/                      # Chaos test scripts
 ├── docs/
 │   ├── openapi.yaml                # Full OpenAPI 3.1 specification
-│   ├── adr/                        # Architecture Decision Records (ADR-0001 – ADR-0010)
+│   ├── adr/                        # Architecture Decision Records (ADR-0001 – ADR-0012)
 │   ├── operator-runbook.md         # Day-2 operations guide
 │   ├── tenant-onboarding.md        # Tenant setup playbook
 │   ├── release-notes-v1.0.0.md    # v1.0.0 release notes
@@ -391,7 +392,7 @@ platform-lowcode/
 |---|---|
 | **User Manual** (Business Analysts) | [`docs/user-manual.html`](docs/user-manual.html) |
 | API Reference (OpenAPI 3.1) | [`docs/openapi.yaml`](docs/openapi.yaml) |
-| Architecture Decision Records | [`docs/adr/`](docs/adr/README.md) (ADR-0001 – ADR-0011) |
+| Architecture Decision Records | [`docs/adr/`](docs/adr/README.md) (ADR-0001 – ADR-0012) |
 | Operator Runbook | [`docs/operator-runbook.md`](docs/operator-runbook.md) |
 | Tenant Onboarding | [`docs/tenant-onboarding.md`](docs/tenant-onboarding.md) |
 | Release Notes v1.0.0 | [`docs/release-notes-v1.0.0.md`](docs/release-notes-v1.0.0.md) |
