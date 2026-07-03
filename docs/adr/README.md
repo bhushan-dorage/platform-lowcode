@@ -17,6 +17,7 @@ Each ADR documents a significant architectural decision: the context that forced
 | [0007](0007-kong-as-api-gateway.md) | Kong as the API Gateway | Accepted |
 | [0008](0008-postgresql-schema-per-tenant.md) | PostgreSQL Schema-per-Tenant Multi-Tenancy Model | Accepted |
 | [0009](0009-connector-spi.md) | Connector SPI for Integration Service | Accepted |
+| [0010](0010-metadata-driven-page-builder.md) | Metadata-Driven Page Builder | Accepted |
 
 ## Format
 
