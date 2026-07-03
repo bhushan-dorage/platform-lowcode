@@ -7,6 +7,7 @@ import DmnEditorPage from './components/DmnEditor/DmnEditorPage';
 import FormDesignerPage from './components/FormDesigner/FormDesignerPage';
 import DataModelerPage from './components/DataModeler/DataModelerPage';
 import RoleManagerPage from './components/RoleManager/RoleManagerPage';
+import PageBuilderPage from './components/PageBuilder/PageBuilderPage';
 
 export const router = createBrowserRouter([
   {
@@ -20,6 +21,7 @@ export const router = createBrowserRouter([
       { path: 'forms/:id?', element: <FormDesignerPage /> },
       { path: 'data', element: <DataModelerPage /> },
       { path: 'roles', element: <RoleManagerPage /> },
+      { path: 'pages/:id?', element: <PageBuilderPage /> },
     ],
   },
 ]);
