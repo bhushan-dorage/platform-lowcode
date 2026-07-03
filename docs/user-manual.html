@@ -1,0 +1,1709 @@
+
+<title>Platform Low-Code · User Manual</title>
+<style>
+/* ─── Tokens ─────────────────────────────────────── */
+:root {
+  --bg:          #F5F7FA;
+  --surface:     #FFFFFF;
+  --border:      #DDE2EB;
+  --ink:         #18263A;
+  --ink-2:       #49596E;
+  --ink-3:       #7A8EA3;
+  --accent:      #0B7B6E;
+  --accent-bg:   #E5F4F2;
+  --accent-dark: #085E54;
+  --amber:       #D97706;
+  --amber-bg:    #FEF3E0;
+  --red:         #C0392B;
+  --red-bg:      #FDEDEB;
+  --nav-bg:      #192132;
+  --nav-text:    #C8D5E4;
+  --nav-muted:   #6D829A;
+  --nav-active:  #0EC4AF;
+  --nav-border:  #263347;
+  --step-num:    #0B7B6E;
+  --tag-bg:      #E8EDF4;
+  --tag-text:    #49596E;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:        #0F1824;
+    --surface:   #19263A;
+    --border:    #263347;
+    --ink:       #E2EAF4;
+    --ink-2:     #94A8C0;
+    --ink-3:     #5A7090;
+    --accent:    #0EC4AF;
+    --accent-bg: #0A2B28;
+    --accent-dark: #0BADA0;
+    --amber:     #F59E0B;
+    --amber-bg:  #2A1F0A;
+    --red:       #F87171;
+    --red-bg:    #2A0F0F;
+    --tag-bg:    #263347;
+    --tag-text:  #94A8C0;
+  }
+}
+:root[data-theme="dark"] {
+  --bg:        #0F1824;
+  --surface:   #19263A;
+  --border:    #263347;
+  --ink:       #E2EAF4;
+  --ink-2:     #94A8C0;
+  --ink-3:     #5A7090;
+  --accent:    #0EC4AF;
+  --accent-bg: #0A2B28;
+  --accent-dark: #0BADA0;
+  --amber:     #F59E0B;
+  --amber-bg:  #2A1F0A;
+  --red:       #F87171;
+  --red-bg:    #2A0F0F;
+  --tag-bg:    #263347;
+  --tag-text:  #94A8C0;
+}
+:root[data-theme="light"] {
+  --bg:          #F5F7FA;
+  --surface:     #FFFFFF;
+  --border:      #DDE2EB;
+  --ink:         #18263A;
+  --ink-2:       #49596E;
+  --ink-3:       #7A8EA3;
+  --accent:      #0B7B6E;
+  --accent-bg:   #E5F4F2;
+  --accent-dark: #085E54;
+  --amber:       #D97706;
+  --amber-bg:    #FEF3E0;
+  --red:         #C0392B;
+  --red-bg:      #FDEDEB;
+  --tag-bg:      #E8EDF4;
+  --tag-text:    #49596E;
+}
+
+/* ─── Reset ──────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; scroll-behavior: smooth; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  html { scroll-behavior: auto; }
+}
+
+/* ─── Layout ─────────────────────────────────────── */
+.manual {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ─── Sidebar ────────────────────────────────────── */
+.sidebar {
+  width: 268px;
+  flex-shrink: 0;
+  background: var(--nav-bg);
+  position: fixed;
+  top: 0; left: 0;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  scrollbar-width: thin;
+  scrollbar-color: var(--nav-border) transparent;
+}
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--nav-border); border-radius: 2px; }
+
+.sidebar-header {
+  padding: 28px 24px 20px;
+  border-bottom: 1px solid var(--nav-border);
+  flex-shrink: 0;
+}
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+.sidebar-logo-mark {
+  width: 32px; height: 32px;
+  background: var(--nav-active);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.sidebar-logo-mark svg { width: 18px; height: 18px; }
+.sidebar-logo-text {
+  color: #FFFFFF;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+.sidebar-logo-sub {
+  color: var(--nav-muted);
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.nav-section {
+  padding: 20px 0 4px;
+}
+.nav-section-label {
+  padding: 0 24px 8px;
+  color: var(--nav-muted);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 24px;
+  color: var(--nav-text);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 400;
+  border-left: 2px solid transparent;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.nav-link:hover {
+  background: rgba(255,255,255,0.05);
+  color: #FFFFFF;
+}
+.nav-link.active {
+  background: rgba(14,196,175,0.1);
+  color: var(--nav-active);
+  border-left-color: var(--nav-active);
+  font-weight: 500;
+}
+.nav-link .nav-icon {
+  width: 16px; height: 16px;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+.nav-link.active .nav-icon { opacity: 1; }
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 16px 24px;
+  border-top: 1px solid var(--nav-border);
+  color: var(--nav-muted);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+/* ─── Content area ───────────────────────────────── */
+.content {
+  margin-left: 268px;
+  flex: 1;
+  min-width: 0;
+}
+
+.content-inner {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 56px 48px 120px;
+}
+
+/* ─── Top bar ────────────────────────────────────── */
+.topbar {
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 50;
+  backdrop-filter: blur(8px);
+}
+.topbar-breadcrumb {
+  font-size: 0.8rem;
+  color: var(--ink-3);
+  letter-spacing: 0.01em;
+}
+.topbar-breadcrumb span { color: var(--ink-2); }
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.theme-toggle {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 10px;
+  color: var(--ink-2);
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.theme-toggle:hover { background: var(--surface); }
+.version-badge {
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+/* ─── Typography ─────────────────────────────────── */
+.section {
+  padding-top: 72px;
+  margin-top: -24px;
+}
+.section:first-child { padding-top: 0; margin-top: 0; }
+
+.eyebrow {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+h1 {
+  font-size: 2.4rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  color: var(--ink);
+  text-wrap: balance;
+  margin-bottom: 18px;
+}
+h2 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+  color: var(--ink);
+  text-wrap: balance;
+  margin-bottom: 14px;
+}
+h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin-bottom: 10px;
+  margin-top: 32px;
+}
+h3:first-child { margin-top: 0; }
+p {
+  color: var(--ink-2);
+  margin-bottom: 16px;
+  max-width: 65ch;
+}
+p:last-child { margin-bottom: 0; }
+strong { color: var(--ink); font-weight: 600; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.lead {
+  font-size: 1.1rem;
+  color: var(--ink-2);
+  line-height: 1.7;
+  margin-bottom: 24px;
+  max-width: 58ch;
+}
+
+.section-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 0;
+}
+
+/* ─── Intro hero ─────────────────────────────────── */
+.hero {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+  border-radius: 16px;
+  padding: 40px 44px;
+  margin-bottom: 48px;
+  color: #FFFFFF;
+  position: relative;
+  overflow: hidden;
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 200px; height: 200px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 50%;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  bottom: -60px; right: 60px;
+  width: 140px; height: 140px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 50%;
+}
+.hero h1 { color: #FFFFFF; font-size: 2rem; margin-bottom: 12px; }
+.hero p { color: rgba(255,255,255,0.82); max-width: 52ch; margin-bottom: 0; }
+.hero-meta {
+  display: flex;
+  gap: 20px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+.hero-chip {
+  background: rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.9);
+  font-size: 0.78rem;
+  font-weight: 500;
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+/* ─── Capability grid ────────────────────────────── */
+.cap-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 28px 0;
+}
+.cap-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 22px;
+}
+.cap-card-icon {
+  width: 36px; height: 36px;
+  background: var(--accent-bg);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 12px;
+  color: var(--accent);
+  font-size: 1.1rem;
+}
+.cap-card h4 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+.cap-card p {
+  font-size: 0.825rem;
+  color: var(--ink-2);
+  margin: 0;
+  max-width: none;
+}
+
+/* ─── Step list ──────────────────────────────────── */
+.steps {
+  margin: 24px 0;
+  counter-reset: step;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.step {
+  display: flex;
+  gap: 20px;
+  position: relative;
+  padding-bottom: 28px;
+}
+.step:last-child { padding-bottom: 0; }
+.step-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+.step-num {
+  counter-increment: step;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #FFFFFF;
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  z-index: 1;
+}
+.step-line {
+  width: 2px;
+  flex: 1;
+  background: var(--border);
+  margin-top: 6px;
+  min-height: 20px;
+}
+.step:last-child .step-line { display: none; }
+.step-body {
+  flex: 1;
+  padding-top: 5px;
+}
+.step-body h4 {
+  font-size: 0.925rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+.step-body p {
+  font-size: 0.875rem;
+  color: var(--ink-2);
+  margin: 0;
+  max-width: 52ch;
+}
+
+/* ─── Call-out boxes ─────────────────────────────── */
+.callout {
+  border-left: 3px solid;
+  border-radius: 0 8px 8px 0;
+  padding: 14px 18px;
+  margin: 24px 0;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+.callout-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.callout p { margin: 0; max-width: none; font-size: inherit; }
+.callout.tip {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  color: var(--ink-2);
+}
+.callout.tip .callout-label { color: var(--accent); }
+.callout.warning {
+  border-color: var(--amber);
+  background: var(--amber-bg);
+  color: var(--ink-2);
+}
+.callout.warning .callout-label { color: var(--amber); }
+.callout.note {
+  border-color: var(--border);
+  background: var(--surface);
+  color: var(--ink-2);
+}
+.callout.note .callout-label { color: var(--ink-3); }
+
+/* ─── Widget reference table ─────────────────────── */
+.widget-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 24px 0;
+}
+.widget-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 20px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.widget-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--tag-bg);
+  color: var(--tag-text);
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.widget-card h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 5px;
+}
+.widget-card p {
+  font-size: 0.8rem;
+  color: var(--ink-2);
+  margin: 0;
+  max-width: none;
+}
+
+/* ─── Status lifecycle ───────────────────────────── */
+.lifecycle {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin: 28px 0;
+  flex-wrap: wrap;
+}
+.lifecycle-step {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 20px;
+  flex: 1;
+  min-width: 140px;
+}
+.lifecycle-step h4 {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.lifecycle-step p {
+  font-size: 0.78rem;
+  color: var(--ink-2);
+  margin: 0;
+  max-width: none;
+}
+.lifecycle-step.draft h4 { color: var(--ink-3); }
+.lifecycle-step.published h4 { color: var(--accent); }
+.lifecycle-step.deprecated h4 { color: var(--amber); }
+.lifecycle-arrow {
+  color: var(--ink-3);
+  font-size: 1.2rem;
+  padding: 0 10px;
+  flex-shrink: 0;
+}
+
+/* ─── Table ──────────────────────────────────────── */
+.data-table-wrap { overflow-x: auto; margin: 24px 0; }
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.data-table th {
+  background: var(--tag-bg);
+  color: var(--ink-2);
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+.data-table td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--ink-2);
+  vertical-align: top;
+}
+.data-table td strong { font-weight: 600; color: var(--ink); }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: var(--bg); }
+
+/* ─── Glossary ───────────────────────────────────── */
+.glossary-list {
+  list-style: none;
+  margin: 24px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.glossary-item {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 16px;
+}
+.glossary-item:last-child { border-bottom: none; }
+.glossary-term {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--ink);
+}
+.glossary-def {
+  font-size: 0.875rem;
+  color: var(--ink-2);
+  line-height: 1.6;
+}
+
+/* ─── UI Mockup ──────────────────────────────────── */
+.ui-mock {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 24px 0;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.ui-mock-bar {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ui-mock-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--border);
+}
+.ui-mock-bar-label {
+  font-size: 0.75rem;
+  color: var(--ink-3);
+  margin-left: 6px;
+  font-family: "SF Mono", "Fira Code", monospace;
+}
+.ui-mock-body {
+  padding: 20px;
+}
+.mock-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.mock-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-2);
+  letter-spacing: 0.03em;
+}
+.mock-textarea {
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 0.85rem;
+  color: var(--ink-2);
+  font-style: italic;
+  min-height: 64px;
+  line-height: 1.5;
+}
+.mock-btn-row {
+  display: flex;
+  gap: 10px;
+}
+.mock-btn {
+  padding: 8px 18px;
+  border-radius: 7px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: default;
+}
+.mock-btn-primary { background: var(--accent); color: #FFFFFF; }
+.mock-btn-secondary {
+  background: var(--surface);
+  color: var(--ink-2);
+  border: 1px solid var(--border);
+}
+.mock-preview-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 10px;
+  margin-top: 18px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.mock-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.mock-kpi {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+}
+.mock-kpi-val {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+.mock-kpi-lab { font-size: 0.72rem; color: var(--ink-3); margin-top: 2px; }
+.mock-table-stub {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+}
+.mock-table-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.75rem;
+  color: var(--ink-2);
+}
+.mock-table-row:last-child { border-bottom: none; }
+.mock-table-row.header { color: var(--ink-3); font-weight: 600; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.mock-badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.mock-badge.green { background: #D1FAE5; color: #065F46; }
+.mock-badge.amber { background: #FEF3C7; color: #92400E; }
+:root[data-theme="dark"] .mock-badge.green { background: #064E3B; color: #34D399; }
+:root[data-theme="dark"] .mock-badge.amber { background: #451A03; color: #FCD34D; }
+@media (prefers-color-scheme: dark) {
+  .mock-badge.green { background: #064E3B; color: #34D399; }
+  .mock-badge.amber { background: #451A03; color: #FCD34D; }
+}
+
+/* ─── Inline code ────────────────────────────────── */
+code {
+  background: var(--tag-bg);
+  color: var(--accent);
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+  font-size: 0.82em;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* ─── Keyboard shortcut ──────────────────────────── */
+kbd {
+  display: inline-flex;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  font-size: 0.78rem;
+  font-family: inherit;
+  padding: 2px 7px;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+/* ─── Responsive ─────────────────────────────────── */
+@media (max-width: 900px) {
+  .sidebar { width: 220px; }
+  .content { margin-left: 220px; }
+  .content-inner { padding: 40px 28px 80px; }
+  .topbar { padding: 12px 28px; }
+}
+@media (max-width: 680px) {
+  .sidebar { display: none; }
+  .content { margin-left: 0; }
+  .cap-grid, .widget-grid { grid-template-columns: 1fr; }
+  .glossary-item { grid-template-columns: 1fr; gap: 4px; }
+  .content-inner { padding: 28px 20px 80px; }
+  .topbar { padding: 12px 20px; }
+  .mock-kpi-row { grid-template-columns: 1fr 1fr; }
+}
+</style>
+
+<div class="manual">
+  <!-- ─── Sidebar ─────────────────────────────── -->
+  <nav class="sidebar" aria-label="Manual navigation">
+    <div class="sidebar-header">
+      <a class="sidebar-logo" href="#welcome" tabindex="0">
+        <div class="sidebar-logo-mark">
+          <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="6" height="6" rx="1.5" fill="white" fill-opacity="0.9"/>
+            <rect x="10" y="2" width="6" height="6" rx="1.5" fill="white" fill-opacity="0.5"/>
+            <rect x="2" y="10" width="6" height="6" rx="1.5" fill="white" fill-opacity="0.5"/>
+            <rect x="10" y="10" width="6" height="6" rx="1.5" fill="white" fill-opacity="0.9"/>
+          </svg>
+        </div>
+        <div>
+          <div class="sidebar-logo-text">Platform Low-Code</div>
+          <div class="sidebar-logo-sub">User Manual</div>
+        </div>
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Introduction</div>
+      <a class="nav-link active" href="#welcome">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 1L2 5v9h4V9h4v5h4V5L8 1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        Welcome
+      </a>
+      <a class="nav-link" href="#getting-started">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Getting Started
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Daily Work</div>
+      <a class="nav-link" href="#task-inbox">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Task Inbox
+      </a>
+      <a class="nav-link" href="#notifications">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2a5 5 0 00-5 5v3l-1 2h12l-1-2V7a5 5 0 00-5-5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M6.5 13a1.5 1.5 0 003 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Notifications
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Build</div>
+      <a class="nav-link" href="#ai-page-generator">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l1.5 3.5L13 7l-3.5 1.5L8 12l-1.5-3.5L3 7l3.5-1.5L8 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        AI Page Generator
+      </a>
+      <a class="nav-link" href="#page-widgets">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/></svg>
+        Page Widgets
+      </a>
+      <a class="nav-link" href="#page-lifecycle">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 8a5 5 0 1010 0 5 5 0 00-10 0z" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v3l2 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Page Lifecycle
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Platform</div>
+      <a class="nav-link" href="#forms">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="4" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="2" y="8" width="8" height="4" rx="1.5" stroke="currentColor" stroke-width="1.5"/></svg>
+        Forms
+      </a>
+      <a class="nav-link" href="#workflows">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="4" cy="4" r="2" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="2" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="4" r="2" stroke="currentColor" stroke-width="1.5"/><path d="M6 4h4M6 4v4m0 0h4m0-4v4m0 0v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Workflows
+      </a>
+      <a class="nav-link" href="#data">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><ellipse cx="8" cy="5" rx="5" ry="2" stroke="currentColor" stroke-width="1.5"/><path d="M3 5v3c0 1.1 2.24 2 5 2s5-.9 5-2V5" stroke="currentColor" stroke-width="1.5"/><path d="M3 8v3c0 1.1 2.24 2 5 2s5-.9 5-2V8" stroke="currentColor" stroke-width="1.5"/></svg>
+        Data &amp; Entities
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Reference</div>
+      <a class="nav-link" href="#glossary">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M4 2h8a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5"/><path d="M5 6h6M5 9h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Glossary
+      </a>
+    </div>
+
+    <div class="sidebar-footer">
+      Version 1.1.0 · For Business Analysts<br>
+      Last updated July 2026
+    </div>
+  </nav>
+
+  <!-- ─── Main content ───────────────────────── -->
+  <div class="content">
+    <div class="topbar">
+      <div class="topbar-breadcrumb">Platform Low-Code &rsaquo; <span>User Manual</span></div>
+      <div class="topbar-actions">
+        <span class="version-badge">v1.1.0</span>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle colour theme">Toggle theme</button>
+      </div>
+    </div>
+
+    <div class="content-inner">
+
+      <!-- ══════════════════════════════════════ -->
+      <!-- WELCOME                               -->
+      <!-- ══════════════════════════════════════ -->
+      <section class="section" id="welcome">
+        <div class="hero">
+          <div class="eyebrow" style="color:rgba(255,255,255,0.7)">User Manual</div>
+          <h1>Build applications.<br>No code required.</h1>
+          <p>This guide is written for Business Analysts and other non-technical users who want to build, configure, and operate pages and workflows on the Platform Low-Code system — without writing a single line of code.</p>
+          <div class="hero-meta">
+            <span class="hero-chip">Business Analysts</span>
+            <span class="hero-chip">Operations Teams</span>
+            <span class="hero-chip">Product Owners</span>
+          </div>
+        </div>
+
+        <h2>What can you build?</h2>
+        <p class="lead">The platform is a toolkit for creating custom business applications — dashboards, data entry forms, approval workflows, and automated processes — entirely through configuration, not code.</p>
+
+        <div class="cap-grid">
+          <div class="cap-card">
+            <div class="cap-card-icon">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2l1.8 4.2L15 7l-4.2 1.8L9 13l-1.8-4.2L3 7l4.2-1.8L9 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            </div>
+            <h4>AI Page Generation</h4>
+            <p>Describe any dashboard or screen in plain English. The platform generates a fully structured page for you in seconds — ready to review, adjust, and publish.</p>
+          </div>
+          <div class="cap-card">
+            <div class="cap-card-icon">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="10" y="2" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="2" y="10" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="10" y="10" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/></svg>
+            </div>
+            <h4>Custom Dashboards</h4>
+            <p>Compose pages from KPI cards, data tables, charts, forms, and text blocks — arranged in a multi-column grid without touching HTML or CSS.</p>
+          </div>
+          <div class="cap-card">
+            <div class="cap-card-icon">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="14" height="5" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="2" y="10" width="9" height="5" rx="1.5" stroke="currentColor" stroke-width="1.5"/></svg>
+            </div>
+            <h4>Business Forms</h4>
+            <p>Build multi-field forms with validation, conditional logic, and workflow triggers — deployable to end users immediately after publishing.</p>
+          </div>
+          <div class="cap-card">
+            <div class="cap-card-icon">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="4" cy="9" r="2" stroke="currentColor" stroke-width="1.5"/><circle cx="14" cy="4" r="2" stroke="currentColor" stroke-width="1.5"/><circle cx="14" cy="14" r="2" stroke="currentColor" stroke-width="1.5"/><path d="M6 9h3m3-5H9l-3 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <h4>Approval Workflows</h4>
+            <p>Route work through multi-step approval chains with automatic escalation, SLA timers, and email notifications — all configured without engineering support.</p>
+          </div>
+          <div class="cap-card">
+            <div class="cap-card-icon">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><ellipse cx="9" cy="6" rx="6" ry="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M3 6v4c0 1.38 2.69 2.5 6 2.5S15 11.38 15 10V6" stroke="currentColor" stroke-width="1.5"/><path d="M3 10v4c0 1.38 2.69 2.5 6 2.5S15 15.38 15 14v-4" stroke="currentColor" stroke-width="1.5"/></svg>
+            </div>
+            <h4>Business Data</h4>
+            <p>Define and manage entities — customers, orders, contracts, or any business object — with a structured data model and full audit history.</p>
+          </div>
+          <div class="cap-card">
+            <div class="cap-card-icon">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2a6 6 0 100 12A6 6 0 009 2z" stroke="currentColor" stroke-width="1.5"/><path d="M9 16v-2M13.24 13.24l-1.41-1.41M16 9h-2M13.24 4.76l-1.41 1.41" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+            <h4>Integrations</h4>
+            <p>Connect to external systems — REST APIs, databases, email, Slack — using preconfigured connectors. No code, just configuration.</p>
+          </div>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-label">Who this guide is for</div>
+          <p>You do not need a technical background to use this manual. If you know how to use a spreadsheet or a CRM, you have all the skills you need. Technical decisions — infrastructure, security, integrations — are handled by your platform team.</p>
+        </div>
+      </section>
+
+      <hr class="section-divider">
+
+      <!-- ══════════════════════════════════════ -->
+      <!-- GETTING STARTED                       -->
+      <!-- ══════════════════════════════════════ -->
+      <section class="section" id="getting-started">
+        <div class="eyebrow">Chapter 1</div>
+        <h2>Getting Started</h2>
+        <p class="lead">From your first login to navigating the main interface — everything you need to find your way around.</p>
+
+        <h3>Logging in</h3>
+        <p>The platform uses your organisation's identity system (Keycloak). You log in with the same credentials you use for other company applications — no separate password required.</p>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-rail"><div class="step-num">1</div><div class="step-line"></div></div>
+            <div class="step-body">
+              <h4>Open the portal</h4>
+              <p>Navigate to the portal URL provided by your platform team (for example, <code>https://platform.yourcompany.com</code>). You will be redirected to the login page automatically.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-rail"><div class="step-num">2</div><div class="step-line"></div></div>
+            <div class="step-body">
+              <h4>Enter your credentials</h4>
+              <p>Use your company username and password. If your organisation uses single sign-on (SSO), click the appropriate button and authenticate with your existing account.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-rail"><div class="step-num">3</div><div class="step-line"></div></div>
+            <div class="step-body">
+              <h4>You're in</h4>
+              <p>After logging in you arrive at the dashboard. Your name appears in the header. Your session stays active for 8 hours before requiring a re-login.</p>
+            </div>
+          </div>
+        </div>
+
+        <h3>Navigating the portal</h3>
+        <p>The portal has three main areas reachable from the top navigation bar:</p>
+
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr><th>Area</th><th>URL path</th><th>What you do here</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Dashboard</strong></td><td><code>/dashboard</code></td><td>Overview of platform activity and quick links to your most-used pages.</td></tr>
+              <tr><td><strong>Task Inbox</strong></td><td><code>/tasks</code></td><td>Work items assigned to you or your group — approvals, reviews, data-entry tasks.</td></tr>
+              <tr><td><strong>Pages</strong></td><td><code>/pages/:key</code></td><td>Published application screens. Each page has its own URL you can bookmark or share.</td></tr>
+              <tr><td><strong>AI Generator</strong></td><td><code>/generate</code></td><td>Create a new page by describing it in plain English.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Your tenant and permissions</h3>
+        <p>The platform supports multiple organisations (tenants) on shared infrastructure. Your account belongs to exactly one tenant, and you can only see your organisation's data. What you can <em>do</em> within that data depends on the roles your administrator has assigned to you — for example, whether you can publish pages or only draft them.</p>
+
+        <div class="callout note">
+          <div class="callout-label">Need more access?</div>
+          <p>If you cannot see a feature described in this guide, your role may not include that permission. Contact your platform administrator or IT team to request the appropriate role.</p>
+        </div>
+      </section>
+
+      <hr class="section-divider">
+
+      <!-- ══════════════════════════════════════ -->
+      <!-- TASK INBOX                            -->
+      <!-- ══════════════════════════════════════ -->
+      <section class="section" id="task-inbox">
+        <div class="eyebrow">Chapter 2</div>
+        <h2>Task Inbox</h2>
+        <p class="lead">The Task Inbox is where work finds you. Every approval, review, or data-entry request that's been routed to you — or your team — appears here.</p>
+
+        <h3>Understanding tasks</h3>
+        <p>A task is a unit of work created by a running workflow process. When a process reaches a human step — "review this request", "approve this budget", "enter missing data" — it creates a task and assigns it to the right person or group.</p>
+
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr><th>Status</th><th>What it means</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Unassigned</strong></td><td>The task belongs to your group but hasn't been picked up yet. Anyone in the group can claim it.</td></tr>
+              <tr><td><strong>Claimed</strong></td><td>You (or a colleague) have taken ownership. Only the person who claimed it can complete it — unless they release it.</td></tr>
+              <tr><td><strong>Overdue</strong></td><td>The SLA deadline has passed. The task is highlighted and may have been escalated to a manager automatically.</td></tr>
+              <tr><td><strong>Completed</strong></td><td>The work is done and the workflow has moved to its next step. Completed tasks are visible in history.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Claiming and completing a task</h3>
+        <div class="steps">
+          <div class="step">
+            <div class="step-rail"><div class="step-num">1</div><div class="step-line"></div></div>
+            <div class="step-body">
+              <h4>Open your inbox</h4>
+              <p>Go to <code>/tasks</code>. You'll see a list of tasks assigned to you or your group, sorted by due date. Overdue items appear at the top with a warning indicator.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-rail"><div class="step-num">2</div><div class="step-line"></div></div>
+            <div class="step-body">
+              <h4>Click on a task to open it</h4>
+              <p>The task detail view shows the task name, description, any attached data from earlier in the process (such as a submitted request form), and the due date.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-rail"><div class="step-num">3</div><div class="step-line"></div></div>
+            <div class="step-body">
+              <h4>Claim the task</h4>
+              <p>Click <strong>Claim</strong> to take ownership. Once claimed, the task is removed from your colleagues' inboxes so two people don't work on the same item simultaneously.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-rail"><div class="step-num">4</div><div class="step-line"></div></div>
+            <div class="step-body">
+              <h4>Complete the task form</h4>
+              <p>Most tasks include a form — fill in the required fields (approval decision, comments, additional data). Required fields are marked with an asterisk (*).</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-rail"><div class="step-num">5</div><div class="step-line"></div></div>
+            <div class="step-body">
+              <h4>Submit</h4>
+              <p>Click <strong>Complete Task</strong>. The workflow moves to its next step automatically — the requester is notified, and the next approver gets their own task if there's a further step.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout warning">
+          <div class="callout-label">Before you submit</div>
+          <p>Completing a task is final — you cannot edit a submitted response. If you realise you made an error after submitting, contact the requester or your administrator to restart the relevant workflow step.</p>
+        </div>
+
+        <h3>Releasing a task you can't finish</h3>
+        <p>If you've claimed a task but need someone else to handle it, use <strong>Release</strong> in the task detail view. The task returns to the group inbox and any colleague can pick it up.</p>
+      </section>
+
+      <hr class="section-divider">
+
+      <!-- ══════════════════════════════════════ -->
+      <!-- NOTIFICATIONS                         -->
+      <!-- ══════════════════════════════════════ -->
+      <section class="section" id="notifications">
+        <div class="eyebrow">Chapter 3</div>
+        <h2>Notifications</h2>
+        <p class="lead">The platform proactively alerts you to events that need your attention — new tasks, process completions, and SLA warnings — through the channels your organisation has configured.</p>
+
+        <h3>How you receive notifications</h3>
+        <p>Your platform administrator configures which events trigger notifications and how they're delivered. The available channels are:</p>
+
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr><th>Channel</th><th>Best for</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>In-app</strong></td><td>Real-time alerts visible while you're working in the portal. Shown as a badge count on the notification bell icon.</td></tr>
+              <tr><td><strong>Email</strong></td><td>Task assignments and process status updates delivered to your work inbox — useful when you're away from the portal.</td></tr>
+              <tr><td><strong>SMS</strong></td><td>Urgent escalations and overdue SLA alerts that require immediate attention.</td></tr>
+              <tr><td><strong>Push</strong></td><td>Mobile push notifications if a mobile companion app has been deployed by your organisation.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-label">Tip</div>
+          <p>Notification preferences — which channels are active and for which events — are managed by your platform administrator. If you're receiving too many notifications or missing critical ones, ask your admin to review your notification profile.</p>
+        </div>
+      </section>
+
+      <hr class="section-divider">
+
+      <!-- ══════════════════════════════════════ -->
+      <!-- AI PAGE GENERATOR                     -->
+      <!-- ══════════════════════════════════════ -->
+      <section class="section" id="ai-page-generator">
+        <div class="eyebrow">Chapter 4</div>
+        <h2>AI Page Generator</h2>
+        <p class="lead">Describe the screen you need in plain English and the platform builds a fully structured page for you — KPI cards, data tables, charts, and forms — all arranged and configured automatically.</p>
+
+        <h3>What the AI Page Generator does</h3>
+        <p>Instead of designing a page layout yourself, you write a description of what the page should do — who will use it, what data it should show, and what actions it should support. The platform's AI reads your description and produces a complete page definition, which you can then preview, adjust, and save.</p>
+
+        <div class="callout tip">
+          <div class="callout-label">No code required</div>
+          <p>You don't need to know about widgets, schemas, or data sources. The AI takes care of the structure. Your job is to describe the business need clearly — the platform handles the rest.</p>
+        </div>
+
+        <h3>Writing a good prompt</h3>
+        <p>The quality of the generated page depends on how clearly you describe your need. A good prompt answers three questions:</p>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-rail"><div class="step-num">1</div><div class="step-line"></div></div>
+            <div class="step-body">
+              <h4>Who is this page for?</h4>
+              <p>Name the audience — operations manager, customer service agent, finance controller. This helps the AI choose the right level of detail and the right widgets.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-rail"><div class="step-num">2</div><div class="step-line"></div></div>
+            <div class="step-body">
+              <h4>What information should it show?</h4>
+              <p>List the key metrics, tables, or data the user needs to see — for example: "total open orders, revenue this month, a table of orders by customer, a bar chart of orders by region."</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-rail"><div class="step-num">3</div><div class="step-line"></div></div>
+            <div class="step-body">
+              <h4>What actions should it support?</h4>
+              <p>If the user needs to do something — submit a form, enter data, filter a table — mention it. For example: "a form to create a new order" or "a searchable product table."</p>
+            </div>
+          </div>
+        </div>
+
+        <h3>Example prompts</h3>
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr><th>Weak prompt</th><th>Stronger prompt</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Order dashboard</td>
+                <td>An order management dashboard for operations staff. Show KPIs for total open orders, revenue this week, and average fulfilment time. Include a table of recent orders with status badges, and a bar chart of orders by product category.</td>
+              </tr>
+              <tr>
+                <td>HR page</td>
+                <td>An employee onboarding tracker for HR. Show the count of new joiners this month, a table of pending onboarding tasks with employee name and start date, and a text block with a link to the HR policy document.</td>
+              </tr>
+              <tr>
+                <td>Finance stuff</td>
+                <td>A budget overview page for the Finance team. Show KPIs for total budget, spent to date, and remaining balance. Include a line chart of monthly spend against budget, and a table of the top 10 expense categories sorted by amount.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Using the generator</h3>
+
+        <div class="ui-mock">
+          <div class="ui-mock-bar">
+            <div class="ui-mock-dot"></div>
+            <div class="ui-mock-dot"></div>
+            <div class="ui-mock-dot"></div>
+            <span class="ui-mock-bar-label">platform.yourcompany.com/generate</span>
+          </div>
+          <div class="ui-mock-body">
+            <div class="mock-input-group">
+              <div class="mock-label">Describe your page</div>
+              <div class="mock-textarea">An order management dashboard for operations staff. Show KPIs for total open orders, revenue this week, and average fulfilment time. Include a table of recent orders with customer name, order total and a status badge, and a bar chart of orders by region.</div>
+            </div>
+            <div class="mock-btn-row">
+              <div class="mock-btn mock-btn-primary">✨ Generate Page</div>
+              <div class="mock-btn mock-btn-secondary">↺ Regenerate</div>
+              <div class="mock-btn" style="background:var(--tag-bg);color:var(--accent);font-weight:600;padding:8px 18px;border-radius:7px;font-size:0.82rem;">💾 Save Page</div>
+            </div>
+            <div class="mock-preview-label">Preview · Order Management Dashboard · key: order-management-dashboard</div>
+            <div class="mock-kpi-row">
+              <div class="mock-kpi">
+                <div class="mock-kpi-val">247</div>
+                <div class="mock-kpi-lab">Open Orders</div>
+              </div>
+              <div class="mock-kpi">
+                <div class="mock-kpi-val">£84.2k</div>
+                <div class="mock-kpi-lab">Revenue This Week</div>
+              </div>
+              <div class="mock-kpi">
+                <div class="mock-kpi-val">1.8d</div>
+                <div class="mock-kpi-lab">Avg Fulfilment</div>
+              </div>
+            </div>
+            <div class="mock-table-stub">
+              <div class="mock-table-row header">
+                <span>Customer</span><span>Total</span><span>Region</span><span>Status</span>
+              </div>
+              <div class="mock-table-row">
+                <span>Acme Corp</span><span>£1,240</span><span>North</span><span><span class="mock-badge amber">Pending</span></span>
+              </div>
+              <div class="mock-table-row">
+                <span>Initech Ltd</span><span>£880</span><span>South</span><span><span class="mock-badge green">Shipped</span></span>
+              </div>
+              <div class="mock-table-row">
+                <span>Umbrella PLC</span><span>£3,100</span><span>West</span><span><span class="mock-badge green">Delivered</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="steps" style="margin-top:28px;">
+          <div class="step">
+            <div class="step-rail"><div class="step-num">1</div><div class="step-line"></div></div>
+            <div class="step-body">
+              <h4>Go to the generator</h4>
+              <p>Navigate to <code>/generate</code> in the portal, or click <strong>AI Page Generator</strong> in the navigation menu.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-rail"><div class="step-num">2</div><div class="step-line"></div></div>
+            <div class="step-body">
+              <h4>Type your description</h4>
+              <p>Write what the page should contain in the text box. There's no special syntax — just describe what you need as you'd explain it to a colleague.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-rail"><div class="step-num">3</div><div class="step-line"></div></div>
+            <div class="step-body">
+              <h4>Click Generate Page</h4>
+              <p>The AI takes 5–15 seconds to think. A live preview appears below the text box — you can scroll through the full generated page with all its widgets.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-rail"><div class="step-num">4</div><div class="step-line"></div></div>
+            <div class="step-body">
+              <h4>Review the preview</h4>
+              <p>Check that the layout, widgets, and data structure match what you had in mind. The suggested <strong>page key</strong> (the URL slug) and <strong>page name</strong> are shown above the preview.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-rail"><div class="step-num">5</div><div class="step-line"></div></div>
+            <div class="step-body">
+              <h4>Regenerate if needed</h4>
+              <p>Not satisfied? Refine your description and click <strong>↺ Regenerate</strong>. Each generation is independent — you can iterate freely without saving anything until you're happy.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-rail"><div class="step-num">6</div><div class="step-line"></div></div>
+            <div class="step-body">
+              <h4>Save the page</h4>
+              <p>When the preview looks right, click <strong>💾 Save Page</strong>. The page is saved as a <strong>Draft</strong> and you're taken straight to the live page view. You can then publish it when you're ready for users to see it.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout warning">
+          <div class="callout-label">About AI-generated data links</div>
+          <p>The AI generates sensible-looking data source URLs (such as <code>/api/v1/entities/order</code>) as placeholders. Widgets that point to a data source that doesn't exist on your system will display an empty state — they won't crash the page. Your platform team can update the data source URLs in the page definition to connect to your real data.</p>
+        </div>
+      </section>
+
+      <hr class="section-divider">
+
+      <!-- ══════════════════════════════════════ -->
+      <!-- PAGE WIDGETS                          -->
+      <!-- ══════════════════════════════════════ -->
+      <section class="section" id="page-widgets">
+        <div class="eyebrow">Chapter 5</div>
+        <h2>Page Widgets</h2>
+        <p class="lead">Every page is built from widgets — reusable building blocks for different types of information. Understanding what each widget does helps you write better prompts and set correct expectations.</p>
+
+        <div class="widget-grid">
+          <div class="widget-card">
+            <div>
+              <div class="widget-badge">KPI</div>
+            </div>
+            <div>
+              <h4>KPI Card</h4>
+              <p>Displays a single number with a label — total orders, revenue, headcount. Supports a trend indicator (up/down arrow) and optional icon. Use for the most important metrics a user needs to see at a glance.</p>
+            </div>
+          </div>
+          <div class="widget-card">
+            <div>
+              <div class="widget-badge">Table</div>
+            </div>
+            <div>
+              <h4>Data Table</h4>
+              <p>Displays rows and columns of data from a connected data source. Supports column types (text, date, status badge), configurable page size, and an optional search bar. Use for lists of records — orders, employees, tickets.</p>
+            </div>
+          </div>
+          <div class="widget-card">
+            <div>
+              <div class="widget-badge">Chart</div>
+            </div>
+            <div>
+              <h4>Chart</h4>
+              <p>Visualises data as a bar chart, line chart, or pie chart. Reads from a data source with a label field and a value field. Use for trends over time, comparisons between categories, or share-of-total analysis.</p>
+            </div>
+          </div>
+          <div class="widget-card">
+            <div>
+              <div class="widget-badge">Form</div>
+            </div>
+            <div>
+              <h4>Embedded Form</h4>
+              <p>Embeds a published form from the Form Service directly on the page. Ideal for data-entry pages where users need to submit information without leaving the dashboard context.</p>
+            </div>
+          </div>
+          <div class="widget-card" style="grid-column: 1 / -1;">
+            <div>
+              <div class="widget-badge">Text</div>
+            </div>
+            <div>
+              <h4>Text / Announcement</h4>
+              <p>A rich text block for instructions, announcements, policy notes, or contextual guidance. Comes in four visual styles: <strong>default</strong> (plain), <strong>info</strong> (teal), <strong>warning</strong> (amber), and <strong>success</strong> (green). Use to give users context they need to act correctly.</p>
+            </div>
+          </div>
+        </div>
+
+        <h3>Widget layout: columns and spans</h3>
+        <p>Pages are divided into <strong>sections</strong>, and each section has a column grid (1 to 4 columns wide). A widget can span multiple columns — a chart that needs more space might span 2 of 3 columns, leaving 1 column for a KPI card beside it.</p>
+        <p>When using the AI generator, you don't need to think about column spans — the AI chooses them based on your description. If you find a widget is too narrow or too wide after generation, ask your platform team to adjust the layout.</p>
+      </section>
+
+      <hr class="section-divider">
+
+      <!-- ══════════════════════════════════════ -->
+      <!-- PAGE LIFECYCLE                        -->
+      <!-- ══════════════════════════════════════ -->
+      <section class="section" id="page-lifecycle">
+        <div class="eyebrow">Chapter 6</div>
+        <h2>Page Lifecycle</h2>
+        <p class="lead">Every page moves through a defined lifecycle. Understanding the states helps you control when users see your changes.</p>
+
+        <div class="lifecycle">
+          <div class="lifecycle-step draft">
+            <h4>Draft</h4>
+            <p>Visible only to editors. The page exists but is not shown to end users. Safe to iterate here without affecting anyone's experience.</p>
+          </div>
+          <div class="lifecycle-arrow">→</div>
+          <div class="lifecycle-step published">
+            <h4>Published</h4>
+            <p>Live for all users with access. The URL is active and the page can be bookmarked and shared.</p>
+          </div>
+          <div class="lifecycle-arrow">→</div>
+          <div class="lifecycle-step deprecated">
+            <h4>Deprecated</h4>
+            <p>Retired. The page is no longer shown to users and cannot be published again. Used to cleanly remove pages without deleting historical data.</p>
+          </div>
+        </div>
+
+        <h3>Publishing a page</h3>
+        <div class="steps">
+          <div class="step">
+            <div class="step-rail"><div class="step-num">1</div><div class="step-line"></div></div>
+            <div class="step-body">
+              <h4>Open the page in draft</h4>
+              <p>Navigate to the page URL (e.g. <code>/pages/order-management-dashboard</code>). In draft mode you see an editor banner at the top of the page.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-rail"><div class="step-num">2</div><div class="step-line"></div></div>
+            <div class="step-body">
+              <h4>Review the page</h4>
+              <p>Check all widgets are showing the right content. Verify column layout looks correct on a typical screen size.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-rail"><div class="step-num">3</div><div class="step-line"></div></div>
+            <div class="step-body">
+              <h4>Click Publish</h4>
+              <p>The page goes live immediately. A version number is recorded — every publish increments the version counter so you have a full history of what changed and when.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-label">Version history</div>
+          <p>Every time you publish a page, a new version is recorded with a timestamp and the name of the person who published it. Your platform team can roll back to any previous version if something goes wrong after a change.</p>
+        </div>
+
+        <h3>Deprecating a page</h3>
+        <p>When a page is no longer needed, deprecate it rather than leaving it live. This removes it from users' navigation and bookmarks but preserves the historical record. You cannot undo a deprecation — if in doubt, leave the page in Draft and discuss with your platform team first.</p>
+      </section>
+
+      <hr class="section-divider">
+
+      <!-- ══════════════════════════════════════ -->
+      <!-- FORMS                                 -->
+      <!-- ══════════════════════════════════════ -->
+      <section class="section" id="forms">
+        <div class="eyebrow">Chapter 7</div>
+        <h2>Forms</h2>
+        <p class="lead">Forms are the primary way users enter data on the platform — submitting a request, recording an outcome, updating a record, or completing a task.</p>
+
+        <h3>What a form is</h3>
+        <p>A form is a structured data-entry screen built by your platform team using the Form Service. Each form has a unique <strong>form key</strong> (like <code>purchase-request</code>) and one or more fields. Forms can be embedded inside pages using the <strong>Form widget</strong>, or they can appear as the completion screen for a task in your inbox.</p>
+
+        <h3>Filling in a form</h3>
+        <p>Forms on the platform behave like any web form — click a field, type your input, and use the tab key to move between fields. A few things to know:</p>
+
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr><th>Field indicator</th><th>Meaning</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>* (asterisk)</strong></td><td>Required — you must fill this in before submitting.</td></tr>
+              <tr><td><strong>Hint text</strong></td><td>Grey text below a field giving guidance on the expected format or acceptable values.</td></tr>
+              <tr><td><strong>Validation error</strong></td><td>A red message beneath a field explaining why your entry isn't accepted (e.g. "Must be a valid email address").</td></tr>
+              <tr><td><strong>Conditional field</strong></td><td>Some fields appear only when a previous answer triggers them — for example, a "Reason for exception" field that shows only when "No" is selected on an approval question.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout warning">
+          <div class="callout-label">Before submitting</div>
+          <p>Form submissions are permanent. Once you click <strong>Submit</strong>, your response is recorded in the audit trail and triggers the next step in the workflow. Double-check your entries, especially numeric values and dates, before submitting.</p>
+        </div>
+
+        <h3>Viewing submissions</h3>
+        <p>After submitting a form you receive an on-screen confirmation. Depending on how your platform is configured, you may also receive an email receipt. To view a list of your past submissions, ask your platform administrator to add a table widget pointing to your form submission data to a relevant page.</p>
+      </section>
+
+      <hr class="section-divider">
+
+      <!-- ══════════════════════════════════════ -->
+      <!-- WORKFLOWS                             -->
+      <!-- ══════════════════════════════════════ -->
+      <section class="section" id="workflows">
+        <div class="eyebrow">Chapter 8</div>
+        <h2>Workflows &amp; Processes</h2>
+        <p class="lead">Workflows automate multi-step business processes — from a simple two-step approval to a complex multi-department process with branching logic, parallel paths, and SLA timers.</p>
+
+        <h3>What a process looks like</h3>
+        <p>A process is a sequence of steps that the platform executes automatically, pausing only when it needs human input. Think of it as a flowchart that the system follows:</p>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-rail"><div class="step-num">1</div><div class="step-line"></div></div>
+            <div class="step-body">
+              <h4>Start event</h4>
+              <p>Something triggers the process — a form submission, an API call, a schedule, or a manual start by a user.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-rail"><div class="step-num">2</div><div class="step-line"></div></div>
+            <div class="step-body">
+              <h4>Automated steps</h4>
+              <p>The system may automatically fetch data, send notifications, call external systems, or update records — all without human involvement.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-rail"><div class="step-num">3</div><div class="step-line"></div></div>
+            <div class="step-body">
+              <h4>Human tasks</h4>
+              <p>When the process needs a decision or data entry from a person, it creates a task and parks itself until the task is completed. This is what you see in your Task Inbox.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-rail"><div class="step-num">4</div><div class="step-line"></div></div>
+            <div class="step-body">
+              <h4>End event</h4>
+              <p>The process concludes — records are updated, notifications are sent to relevant parties, and the process instance is archived.</p>
+            </div>
+          </div>
+        </div>
+
+        <h3>Starting a process</h3>
+        <p>Processes are typically started in one of two ways:</p>
+        <ul style="margin: 12px 0 16px 20px; color: var(--ink-2); font-size: 0.9rem; display: flex; flex-direction: column; gap: 8px; max-width: 58ch;">
+          <li><strong>Submitting a form</strong> — the form submission itself triggers the process. The confirmation screen will tell you that a process has been started.</li>
+          <li><strong>Clicking a Start Process button</strong> — on a page where a process has been made directly startable, a button appears that launches the process immediately (sometimes with a brief setup form).</li>
+        </ul>
+
+        <h3>SLAs and deadlines</h3>
+        <p>Many tasks carry an SLA — a time limit within which the task must be completed. When a deadline is approaching, the task appears in your inbox with an amber warning. When the deadline has passed, it turns red. Some processes are configured to automatically escalate overdue tasks to a manager.</p>
+
+        <div class="callout tip">
+          <div class="callout-label">Monitor process status</div>
+          <p>If you started a process and want to check where it is — which step it's on, whether it's waiting for someone else to act — ask your platform team to add a process status panel to a relevant page. The platform tracks the full status of every running process instance.</p>
+        </div>
+      </section>
+
+      <hr class="section-divider">
+
+      <!-- ══════════════════════════════════════ -->
+      <!-- DATA                                  -->
+      <!-- ══════════════════════════════════════ -->
+      <section class="section" id="data">
+        <div class="eyebrow">Chapter 9</div>
+        <h2>Data &amp; Entities</h2>
+        <p class="lead">The platform has a built-in data layer where your organisation's business objects — customers, orders, contracts, products — are stored and managed as entities.</p>
+
+        <h3>What is an entity?</h3>
+        <p>An entity is a business object with a fixed structure — for example, an <em>Order</em> entity might have fields for customer name, order date, total value, and status. Your platform team defines the structure; you and your colleagues create, view, and update records through pages and forms.</p>
+
+        <h3>Working with entity data</h3>
+        <p>As a business user, you interact with entity data through widgets on pages:</p>
+
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr><th>What you want to do</th><th>How to do it</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>View a list of records</td><td>Use a <strong>Table widget</strong> on a page connected to the entity data source.</td></tr>
+              <tr><td>See summary statistics</td><td>Use a <strong>KPI widget</strong> pointing to a count or aggregate of entity records.</td></tr>
+              <tr><td>Create a new record</td><td>Use a <strong>Form widget</strong> configured to submit to the entity's create endpoint.</td></tr>
+              <tr><td>Update an existing record</td><td>Use a task form inside a workflow, or a form pre-populated with an existing record's data.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Audit trail</h3>
+        <p>Every create, update, and delete action on entity data is recorded in the platform's audit log. The audit trail captures who made the change, when, from which IP address, and what the previous value was. This record is tamper-evident — it cannot be altered after the fact — making it suitable for regulatory compliance requirements.</p>
+
+        <div class="callout note">
+          <div class="callout-label">Data residency</div>
+          <p>Your organisation's data never leaves your tenancy — entities, audit records, and form submissions all belong exclusively to your tenant and are invisible to other organisations on the shared platform.</p>
+        </div>
+      </section>
+
+      <hr class="section-divider">
+
+      <!-- ══════════════════════════════════════ -->
+      <!-- GLOSSARY                              -->
+      <!-- ══════════════════════════════════════ -->
+      <section class="section" id="glossary">
+        <div class="eyebrow">Reference</div>
+        <h2>Glossary</h2>
+        <p class="lead">Plain-English definitions of the terms you'll encounter on the platform.</p>
+
+        <ul class="glossary-list">
+          <li class="glossary-item">
+            <span class="glossary-term">Audit trail</span>
+            <span class="glossary-def">A permanent, tamper-evident record of every action taken on the platform — who did what, and when. Used for compliance and security investigations.</span>
+          </li>
+          <li class="glossary-item">
+            <span class="glossary-term">Claim (a task)</span>
+            <span class="glossary-def">Taking personal ownership of a task from your group inbox so that only you can complete it. Prevents two people from working on the same item at once.</span>
+          </li>
+          <li class="glossary-item">
+            <span class="glossary-term">Connector</span>
+            <span class="glossary-def">A configured link between the platform and an external system — for example, a REST API, a database, an email server, or a Slack channel. Set up by your platform team.</span>
+          </li>
+          <li class="glossary-item">
+            <span class="glossary-term">Draft</span>
+            <span class="glossary-def">A page status meaning the page has been created but is not visible to end users yet. You can iterate freely on a draft without affecting anyone's experience.</span>
+          </li>
+          <li class="glossary-item">
+            <span class="glossary-term">Entity</span>
+            <span class="glossary-def">A structured business object stored on the platform — such as an Order, Customer, or Contract. Entities have defined fields and are managed through pages and forms.</span>
+          </li>
+          <li class="glossary-item">
+            <span class="glossary-term">Form</span>
+            <span class="glossary-def">A data-entry screen with defined fields and validation rules. Forms are built by your platform team and embedded in pages or presented as task completion screens.</span>
+          </li>
+          <li class="glossary-item">
+            <span class="glossary-term">Page</span>
+            <span class="glossary-def">A configurable application screen made up of widgets arranged in sections. Pages are stored as configuration — publishing a new page requires no code deployment.</span>
+          </li>
+          <li class="glossary-item">
+            <span class="glossary-term">Page key</span>
+            <span class="glossary-def">The unique identifier for a page, used in its URL — for example, the page key <code>order-dashboard</code> produces the URL <code>/pages/order-dashboard</code>. Chosen when the page is created.</span>
+          </li>
+          <li class="glossary-item">
+            <span class="glossary-term">Process</span>
+            <span class="glossary-def">An automated multi-step workflow that the platform executes, pausing at human task steps. Also called a workflow instance.</span>
+          </li>
+          <li class="glossary-item">
+            <span class="glossary-term">Publish</span>
+            <span class="glossary-def">Moving a page from Draft to Published — making it live and accessible to all users with the appropriate permission. A published page is versioned.</span>
+          </li>
+          <li class="glossary-item">
+            <span class="glossary-term">Section</span>
+            <span class="glossary-def">A horizontal grouping of widgets on a page, with its own column grid (1–4 columns). Pages are composed of one or more sections stacked vertically.</span>
+          </li>
+          <li class="glossary-item">
+            <span class="glossary-term">SLA</span>
+            <span class="glossary-def">Service Level Agreement — the time limit within which a task must be completed. Tasks approaching or past their SLA deadline are flagged with a warning in the inbox.</span>
+          </li>
+          <li class="glossary-item">
+            <span class="glossary-term">Tenant</span>
+            <span class="glossary-def">Your organisation's isolated environment on the platform. Data in your tenant is completely separate from any other organisation using the same system.</span>
+          </li>
+          <li class="glossary-item">
+            <span class="glossary-term">Widget</span>
+            <span class="glossary-def">A reusable building block on a page — KPI card, data table, chart, form, or text block. Widgets are configured (not coded) and can be combined freely to build any screen.</span>
+          </li>
+          <li class="glossary-item">
+            <span class="glossary-term">Workflow</span>
+            <span class="glossary-def">A pre-defined sequence of automated and human steps that handles a business process — approvals, onboarding, exception handling — consistently and with a full audit record.</span>
+          </li>
+        </ul>
+      </section>
+
+    </div><!-- /content-inner -->
+  </div><!-- /content -->
+</div><!-- /manual -->
+
+<script>
+/* ─── Theme toggle ─────────────────────────────── */
+const root = document.documentElement;
+const btn  = document.getElementById('themeToggle');
+let current = null;
+
+function applyTheme(t) {
+  current = t;
+  root.setAttribute('data-theme', t);
+  btn.textContent = t === 'dark' ? 'Light mode' : 'Dark mode';
+  try { localStorage.setItem('man-theme', t); } catch(_) {}
+}
+
+btn.addEventListener('click', () => applyTheme(current === 'dark' ? 'light' : 'dark'));
+
+(function() {
+  try {
+    const saved = localStorage.getItem('man-theme');
+    if (saved === 'dark' || saved === 'light') { applyTheme(saved); return; }
+  } catch(_) {}
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  applyTheme(prefersDark ? 'dark' : 'light');
+})();
+
+/* ─── Scroll spy ───────────────────────────────── */
+const sections = document.querySelectorAll('section[id]');
+const navLinks  = document.querySelectorAll('.nav-link[href^="#"]');
+
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navLinks.forEach(l => {
+        l.classList.toggle('active', l.getAttribute('href') === '#' + entry.target.id);
+      });
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+
+sections.forEach(s => obs.observe(s));
+</script>

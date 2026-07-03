@@ -389,6 +389,7 @@ platform-lowcode/
 
 | Document | Location |
 |---|---|
+| **User Manual** (Business Analysts) | [`docs/user-manual.html`](docs/user-manual.html) |
 | API Reference (OpenAPI 3.1) | [`docs/openapi.yaml`](docs/openapi.yaml) |
 | Architecture Decision Records | [`docs/adr/`](docs/adr/README.md) (ADR-0001 – ADR-0011) |
 | Operator Runbook | [`docs/operator-runbook.md`](docs/operator-runbook.md) |
