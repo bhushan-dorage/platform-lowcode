@@ -5,9 +5,11 @@ import com.platform.common.tenant.TenantContext;
 import com.platform.studio.artifact.domain.ArtifactType;
 import com.platform.studio.artifact.domain.BundleStatus;
 import com.platform.studio.artifact.domain.DeploymentBundle;
+import com.platform.studio.artifact.dto.ArtifactContentDto;
 import com.platform.studio.artifact.dto.CreateBundleRequest;
 import com.platform.studio.artifact.messaging.BpmnResource;
 import com.platform.studio.artifact.messaging.BundleDeployEvent;
+import com.platform.studio.artifact.messaging.DmnResource;
 import com.platform.studio.artifact.repository.DeploymentBundleRepository;
 import com.platform.studio.exception.ResourceNotFoundException;
 import io.micrometer.core.annotation.Timed;
@@ -57,10 +59,17 @@ public class BundleService {
         bundle.setStatus(BundleStatus.DEPLOYING);
         bundleRepo.save(bundle);
 
-        List<BpmnResource> bpmnResources = bundle.getArtifactVersions().entrySet().stream()
+        List<ArtifactContentDto> publishedContent = bundle.getArtifactVersions().entrySet().stream()
                 .map(e -> artifactService.getPublishedContent(UUID.fromString(e.getKey()), e.getValue()))
+                .toList();
+
+        List<BpmnResource> bpmnResources = publishedContent.stream()
                 .filter(content -> content.metadata().type() == ArtifactType.BPMN)
                 .map(content -> new BpmnResource(content.metadata().name(), content.content()))
+                .toList();
+        List<DmnResource> dmnResources = publishedContent.stream()
+                .filter(content -> content.metadata().type() == ArtifactType.DMN)
+                .map(content -> new DmnResource(content.metadata().name(), content.content()))
                 .toList();
 
         kafkaProducer.send("studio.deploy.events", bundleId.toString(), new BundleDeployEvent(
@@ -70,11 +79,12 @@ public class BundleService {
                 bundle.getVersion(),
                 bundle.getArtifactVersions(),
                 bpmnResources,
+                dmnResources,
                 userId,
                 Instant.now()
         ));
-        log.info("Bundle deploy requested bundleId={} version={} bpmnResourceCount={} by={}",
-                bundleId, bundle.getVersion(), bpmnResources.size(), userId);
+        log.info("Bundle deploy requested bundleId={} version={} bpmnResourceCount={} dmnResourceCount={} by={}",
+                bundleId, bundle.getVersion(), bpmnResources.size(), dmnResources.size(), userId);
         return bundle;
     }
 

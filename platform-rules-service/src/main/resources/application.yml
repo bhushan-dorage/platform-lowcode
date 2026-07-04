@@ -3,20 +3,39 @@ server:
 spring:
   application:
     name: platform-rules-service
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/platform}
+    username: ${DB_USER:platform}
+    password: ${DB_PASSWORD:platform}
+    driver-class-name: org.postgresql.Driver
   data:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      group-id: rules-service-bundle-deploy
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.platform.rules.*,com.platform.common.*"
   security:
     oauth2:
       resourceserver:
         jwt:
           issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/platform}
-kie:
-  server:
-    url: ${KIE_SERVER_URL:http://localhost:8180/kie-server/services/rest}
-    user: ${KIE_USER:kieserver}
-    password: ${KIE_PASSWORD:kieserver1!}
+
+flowable:
+  database-schema-update: true
+  dmn:
+    enabled: true
+    deploy-resources: false
+
 management:
   endpoints:
     web:

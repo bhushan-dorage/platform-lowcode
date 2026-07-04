@@ -58,9 +58,10 @@ class BundleServiceTest {
     }
 
     @Test
-    void deployBundle_embedsOnlyBpmnResourcesInEvent() {
+    void deployBundle_partitionsBpmnAndDmnResourcesInEvent() {
         UUID bundleId = UUID.randomUUID();
         UUID bpmnArtifactId = UUID.randomUUID();
+        UUID dmnArtifactId = UUID.randomUUID();
         UUID formArtifactId = UUID.randomUUID();
 
         DeploymentBundle bundle = new DeploymentBundle();
@@ -70,6 +71,7 @@ class BundleServiceTest {
         bundle.setStatus(BundleStatus.DRAFT);
         bundle.setArtifactVersions(Map.of(
                 bpmnArtifactId.toString(), "1.0.0",
+                dmnArtifactId.toString(), "1.0.0",
                 formArtifactId.toString(), "2.0.0"
         ));
 
@@ -77,6 +79,8 @@ class BundleServiceTest {
         when(bundleRepo.save(any())).thenReturn(bundle);
         when(artifactService.getPublishedContent(bpmnArtifactId, "1.0.0"))
                 .thenReturn(new ArtifactContentDto(artifactDto(bpmnArtifactId, ArtifactType.BPMN, "loan-approval"), "<bpmn/>"));
+        when(artifactService.getPublishedContent(dmnArtifactId, "1.0.0"))
+                .thenReturn(new ArtifactContentDto(artifactDto(dmnArtifactId, ArtifactType.DMN, "loan-eligibility"), "<dmn/>"));
         when(artifactService.getPublishedContent(formArtifactId, "2.0.0"))
                 .thenReturn(new ArtifactContentDto(artifactDto(formArtifactId, ArtifactType.FORM, "intake-form"), "{}"));
 
@@ -93,6 +97,9 @@ class BundleServiceTest {
         assertThat(event.resources()).hasSize(1);
         assertThat(event.resources().get(0).name()).isEqualTo("loan-approval");
         assertThat(event.resources().get(0).content()).isEqualTo("<bpmn/>");
+        assertThat(event.dmnResources()).hasSize(1);
+        assertThat(event.dmnResources().get(0).name()).isEqualTo("loan-eligibility");
+        assertThat(event.dmnResources().get(0).content()).isEqualTo("<dmn/>");
     }
 
     @Test

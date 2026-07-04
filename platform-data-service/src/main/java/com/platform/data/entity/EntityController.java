@@ -3,7 +3,6 @@ package com.platform.data.entity;
 import com.platform.common.web.CursorPage;
 import com.platform.common.web.StandardResponseEnvelope;
 import com.platform.data.entity.domain.EntityDefinition;
-import com.platform.data.entity.domain.EntityRecord;
 import com.platform.data.entity.dto.CreateEntityDefinitionRequest;
 import com.platform.data.entity.dto.UpdateEntityDefinitionRequest;
 import com.platform.data.entity.dto.UpsertEntityRecordRequest;
@@ -48,7 +47,7 @@ public class EntityController {
     }
 
     @PostMapping("/{entityType}")
-    public ResponseEntity<StandardResponseEnvelope<EntityRecord>> createRecord(
+    public ResponseEntity<StandardResponseEnvelope<Map<String, Object>>> createRecord(
             @PathVariable String entityType,
             @Valid @RequestBody UpsertEntityRecordRequest req,
             Authentication auth, HttpServletRequest http) {
@@ -72,7 +71,7 @@ public class EntityController {
     }
 
     @PutMapping("/{entityType}/{id}")
-    public ResponseEntity<StandardResponseEnvelope<EntityRecord>> updateRecord(
+    public ResponseEntity<StandardResponseEnvelope<Map<String, Object>>> updateRecord(
             @PathVariable String entityType, @PathVariable UUID id,
             @Valid @RequestBody UpsertEntityRecordRequest req, HttpServletRequest http) {
         return ResponseEntity.ok(ok(entityService.updateRecord(entityType, id, req), http));

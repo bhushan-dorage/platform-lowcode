@@ -78,12 +78,13 @@ public class ArtifactService {
 
     /**
      * Pushes FORM/DATA_MODEL artifacts into their runtime service's own persistence so what
-     * Studio publishes is actually what the Portal serves. BPMN goes through the bundle-deploy
-     * path instead; DMN/RULE_SET are out of scope (rules-service isn't wired up yet).
+     * Studio publishes is actually what the Portal serves. BPMN and DMN both go through the
+     * bundle-deploy path instead (see BundleService.deployBundle()); RULE_SET is out of scope
+     * (no editor UI or runtime consumer exists for it).
      */
     private void bridgeToRuntimeService(Artifact artifact) {
         if (artifact.getType() != ArtifactType.FORM && artifact.getType() != ArtifactType.DATA_MODEL) {
-            return; // BPMN handled by bundle deploy; DMN/RULE_SET out of scope
+            return; // BPMN/DMN handled by bundle deploy; RULE_SET out of scope
         }
         String displayName = artifact.getDisplayName() != null ? artifact.getDisplayName() : artifact.getName();
         String content = gitStore.readContent(

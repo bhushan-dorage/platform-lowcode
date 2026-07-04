@@ -7,5 +7,5 @@ import java.util.Map;
 public record RuleExecutionRequest(
         @NotBlank String ruleSetKey,
         @NotNull Map<String, Object> inputs,
-        String containerId   // KIE container override; defaults to ruleSetKey
+        @Deprecated String containerId   // KIE-only concept; ignored by the embedded Flowable DMN engine
 ) {}

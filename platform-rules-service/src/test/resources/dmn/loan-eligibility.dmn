@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+             xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/"
+             xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/"
+             id="loan-eligibility-definitions"
+             name="loan-eligibility-definitions"
+             namespace="http://platform/test/loan-eligibility">
+  <decision id="loan-eligibility" name="Loan Eligibility">
+    <decisionTable id="decisionTable1" hitPolicy="UNIQUE">
+      <input id="input1" label="Income">
+        <inputExpression id="inputExpression1" typeRef="number">
+          <text>income</text>
+        </inputExpression>
+      </input>
+      <output id="output1" label="Approved" name="approved" typeRef="boolean"/>
+      <rule id="rule1">
+        <inputEntry id="inputEntry1">
+          <text>&gt;= 30000</text>
+        </inputEntry>
+        <outputEntry id="outputEntry1">
+          <text>true</text>
+        </outputEntry>
+      </rule>
+      <rule id="rule2">
+        <inputEntry id="inputEntry2">
+          <text>&lt; 30000</text>
+        </inputEntry>
+        <outputEntry id="outputEntry2">
+          <text>false</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram>
+      <dmndi:DMNShape dmnElementRef="loan-eligibility">
+        <dc:Bounds height="80" width="180" x="100" y="100"/>
+      </dmndi:DMNShape>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>

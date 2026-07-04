@@ -5,6 +5,7 @@ import java.util.Map;
 
 public record RuleExecutionResponse(
         Map<String, Object> outputs,
+        List<Map<String, Object>> outputRows,
         List<String> firedRules,
         long executionTimeMs,
         String ruleSetKey,

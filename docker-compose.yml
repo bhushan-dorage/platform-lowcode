@@ -424,10 +424,18 @@ services:
     ports:
       - "8095:8080"
     environment:
+      DB_URL: jdbc:postgresql://postgres:5432/platform
+      DB_USER: platform
+      DB_PASSWORD: platform
+      KAFKA_BOOTSTRAP: kafka:9092
       REDIS_HOST: redis
       REDIS_PORT: 6379
       KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/platform
     depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
       redis:
         condition: service_healthy
     healthcheck:
