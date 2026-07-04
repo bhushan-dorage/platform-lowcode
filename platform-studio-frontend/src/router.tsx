@@ -1,4 +1,3 @@
-import React from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import Shell from './components/Layout/Shell';
 import ArtifactsPage from './pages/ArtifactsPage';

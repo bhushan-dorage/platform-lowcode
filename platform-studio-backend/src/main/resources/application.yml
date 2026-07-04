@@ -35,6 +35,17 @@ studio:
   git:
     repos-path: ${STUDIO_GIT_REPOS_PATH:/var/platform/git-repos}
 
+keycloak:
+  token-url: ${KEYCLOAK_TOKEN_URL:http://localhost:8080/realms/platform/protocol/openid-connect/token}
+  client-id: ${KEYCLOAK_CLIENT_ID:platform-api}
+  client-secret: ${KEYCLOAK_CLIENT_SECRET:platform-api-secret}
+
+runtime-services:
+  form-service:
+    base-url: ${FORM_SERVICE_BASE_URL:http://localhost:8080}
+  data-service:
+    base-url: ${DATA_SERVICE_BASE_URL:http://localhost:8080}
+
 management:
   endpoints:
     web:

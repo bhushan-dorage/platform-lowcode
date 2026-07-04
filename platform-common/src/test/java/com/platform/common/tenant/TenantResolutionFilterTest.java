@@ -2,8 +2,6 @@ package com.platform.common.tenant;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +11,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.MDC;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+
+import java.time.Instant;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -38,10 +42,33 @@ class TenantResolutionFilterTest {
     void cleanup() {
         TenantContext.clear();
         MDC.clear();
+        SecurityContextHolder.clearContext();
+    }
+
+    private static void authenticateAsJwt(String tenantId) {
+        Jwt jwt = Jwt.withTokenValue("test-token")
+                .header("alg", "none")
+                .claim("tenant_id", tenantId)
+                .issuedAt(Instant.now())
+                .expiresAt(Instant.now().plusSeconds(300))
+                .build();
+        SecurityContextHolder.getContext().setAuthentication(
+                new JwtAuthenticationToken(jwt, java.util.List.of()));
+    }
+
+    private static void authenticateAsJwtWithoutTenantClaim() {
+        Jwt jwt = Jwt.withTokenValue("test-token")
+                .header("alg", "none")
+                .claim("roles", Map.of())
+                .issuedAt(Instant.now())
+                .expiresAt(Instant.now().plusSeconds(300))
+                .build();
+        SecurityContextHolder.getContext().setAuthentication(
+                new JwtAuthenticationToken(jwt, java.util.List.of()));
     }
 
     @Test
-    void missingTenantIdHeader_returns400() throws Exception {
+    void missingClaimAndHeader_returns400() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -53,7 +80,7 @@ class TenantResolutionFilterTest {
     }
 
     @Test
-    void blankTenantIdHeader_returns400() throws Exception {
+    void blankTenantIdHeader_noJwt_returns400() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader("X-Tenant-ID", "   ");
         MockHttpServletResponse response = new MockHttpServletResponse();
@@ -80,14 +107,13 @@ class TenantResolutionFilterTest {
     }
 
     @Test
-    void validHeader_setsTenantContextAndMdc() throws Exception {
+    void jwtTenantClaim_setsTenantContextAndMdc() throws Exception {
         when(tenantRegistry.resolveTier("acme")).thenReturn(TenantTier.ENTERPRISE);
+        authenticateAsJwt("acme");
 
         MockHttpServletRequest request = new MockHttpServletRequest();
-        request.addHeader("X-Tenant-ID", "acme");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        // Capture context state from inside the chain while it is active
         doAnswer(invocation -> {
             assertThat(TenantContext.getTenantId()).isEqualTo("acme");
             assertThat(TenantContext.getTier()).isEqualTo(TenantTier.ENTERPRISE);
@@ -99,6 +125,75 @@ class TenantResolutionFilterTest {
         filter.doFilter(request, response, filterChain);
 
         assertThat(response.getStatus()).isEqualTo(200);
+    }
+
+    @Test
+    void jwtTenantClaim_takesPrecedenceOverHeader() throws Exception {
+        when(tenantRegistry.resolveTier("acme")).thenReturn(TenantTier.ENTERPRISE);
+        authenticateAsJwt("acme");
+
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader("X-Tenant-ID", "some-other-tenant");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        doAnswer(invocation -> {
+            assertThat(TenantContext.getTenantId()).isEqualTo("acme");
+            return null;
+        }).when(filterChain).doFilter(any(), any());
+
+        filter.doFilter(request, response, filterChain);
+
+        assertThat(response.getStatus()).isEqualTo(200);
+        verify(tenantRegistry, never()).resolveTier("some-other-tenant");
+    }
+
+    @Test
+    void noTenantClaimOnJwt_fallsBackToHeader() throws Exception {
+        when(tenantRegistry.resolveTier("acme")).thenReturn(TenantTier.ENTERPRISE);
+        authenticateAsJwtWithoutTenantClaim();
+
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader("X-Tenant-ID", "acme");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        doAnswer(invocation -> {
+            assertThat(TenantContext.getTenantId()).isEqualTo("acme");
+            return null;
+        }).when(filterChain).doFilter(any(), any());
+
+        filter.doFilter(request, response, filterChain);
+
+        assertThat(response.getStatus()).isEqualTo(200);
+    }
+
+    @Test
+    void noJwtAtAll_fallsBackToHeader() throws Exception {
+        when(tenantRegistry.resolveTier("acme")).thenReturn(TenantTier.ENTERPRISE);
+
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader("X-Tenant-ID", "acme");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        doAnswer(invocation -> {
+            assertThat(TenantContext.getTenantId()).isEqualTo("acme");
+            return null;
+        }).when(filterChain).doFilter(any(), any());
+
+        filter.doFilter(request, response, filterChain);
+
+        assertThat(response.getStatus()).isEqualTo(200);
+    }
+
+    @Test
+    void actuatorPath_bypassesTenantResolutionEntirely() throws Exception {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/actuator/health");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        filter.doFilter(request, response, filterChain);
+
+        verify(filterChain).doFilter(request, response);
+        verifyNoInteractions(tenantRegistry);
+        assertThat(TenantContext.get()).isNull();
     }
 
     @Test

@@ -2,10 +2,12 @@ package com.platform.studio.artifact.service;
 
 import com.platform.common.kafka.TenantAwareKafkaProducer;
 import com.platform.common.tenant.TenantContext;
+import com.platform.studio.artifact.domain.ArtifactType;
 import com.platform.studio.artifact.domain.BundleStatus;
 import com.platform.studio.artifact.domain.DeploymentBundle;
 import com.platform.studio.artifact.dto.CreateBundleRequest;
-import com.platform.studio.artifact.repository.ArtifactRepository;
+import com.platform.studio.artifact.messaging.BpmnResource;
+import com.platform.studio.artifact.messaging.BundleDeployEvent;
 import com.platform.studio.artifact.repository.DeploymentBundleRepository;
 import com.platform.studio.exception.ResourceNotFoundException;
 import io.micrometer.core.annotation.Timed;
@@ -16,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -25,7 +26,7 @@ import java.util.UUID;
 public class BundleService {
 
     private final DeploymentBundleRepository bundleRepo;
-    private final ArtifactRepository artifactRepo;
+    private final ArtifactService artifactService;
     private final TenantAwareKafkaProducer kafkaProducer;
 
     @Timed(value = "studio.bundle.create")
@@ -56,16 +57,24 @@ public class BundleService {
         bundle.setStatus(BundleStatus.DEPLOYING);
         bundleRepo.save(bundle);
 
-        kafkaProducer.send("studio.deploy.events", bundleId.toString(), Map.of(
-                "eventType", "BUNDLE_DEPLOY_REQUESTED",
-                "bundleId", bundleId.toString(),
-                "tenantId", tenantId,
-                "version", bundle.getVersion(),
-                "artifactVersions", bundle.getArtifactVersions(),
-                "requestedBy", userId,
-                "requestedAt", Instant.now().toString()
+        List<BpmnResource> bpmnResources = bundle.getArtifactVersions().entrySet().stream()
+                .map(e -> artifactService.getPublishedContent(UUID.fromString(e.getKey()), e.getValue()))
+                .filter(content -> content.metadata().type() == ArtifactType.BPMN)
+                .map(content -> new BpmnResource(content.metadata().name(), content.content()))
+                .toList();
+
+        kafkaProducer.send("studio.deploy.events", bundleId.toString(), new BundleDeployEvent(
+                "BUNDLE_DEPLOY_REQUESTED",
+                bundleId.toString(),
+                tenantId,
+                bundle.getVersion(),
+                bundle.getArtifactVersions(),
+                bpmnResources,
+                userId,
+                Instant.now()
         ));
-        log.info("Bundle deploy requested bundleId={} version={} by={}", bundleId, bundle.getVersion(), userId);
+        log.info("Bundle deploy requested bundleId={} version={} bpmnResourceCount={} by={}",
+                bundleId, bundle.getVersion(), bpmnResources.size(), userId);
         return bundle;
     }
 

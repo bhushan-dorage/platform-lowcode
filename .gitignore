@@ -2,6 +2,8 @@
 **/target/
 **/.mvn/wrapper/maven-wrapper.jar
 **/*.class
+**/node_modules/
+**/dist/
 
 # IDE
 .idea/

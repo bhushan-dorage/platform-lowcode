@@ -9,7 +9,8 @@ package com.platform.common.tenant;
 public interface TenantRegistry {
 
     /**
-     * @param tenantId the raw tenant identifier from the X-Tenant-ID header
+     * @param tenantId the resolved tenant identifier (from the JWT's tenant_id claim, or the
+     *                 X-Tenant-ID header as a fallback for non-user-facing callers)
      * @return the resolved tier
      * @throws TenantNotFoundException if tenantId is unknown
      */

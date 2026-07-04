@@ -15,11 +15,6 @@ interface Permission {
   description: string;
 }
 
-interface UserRole {
-  userId: string;
-  roles: string[];
-}
-
 const inputStyle: React.CSSProperties = {
   padding: '6px 10px', border: '1px solid var(--border)',
   borderRadius: 6, fontSize: 13,

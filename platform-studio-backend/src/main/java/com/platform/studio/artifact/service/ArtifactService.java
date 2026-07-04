@@ -1,6 +1,10 @@
 package com.platform.studio.artifact.service;
 
 import com.platform.common.tenant.TenantContext;
+import com.platform.studio.artifact.bridge.DataServiceClient;
+import com.platform.studio.artifact.bridge.FormFieldsToJsonSchemaMapper;
+import com.platform.studio.artifact.bridge.FormPublishPayload;
+import com.platform.studio.artifact.bridge.FormServiceClient;
 import com.platform.studio.artifact.domain.Artifact;
 import com.platform.studio.artifact.domain.ArtifactStatus;
 import com.platform.studio.artifact.domain.ArtifactType;
@@ -26,6 +30,9 @@ public class ArtifactService {
 
     private final ArtifactRepository artifactRepo;
     private final GitArtifactStore gitStore;
+    private final FormFieldsToJsonSchemaMapper formFieldsMapper;
+    private final FormServiceClient formServiceClient;
+    private final DataServiceClient dataServiceClient;
 
     @Timed(value = "studio.artifact.save")
     @Transactional
@@ -60,12 +67,34 @@ public class ArtifactService {
             throw new IllegalStateException("Artifact has no committed content");
         }
         gitStore.tag(tenantId, artifact.getType(), artifact.getName(), version, artifact.getHeadCommitSha());
+        bridgeToRuntimeService(artifact);
 
         artifact.setCurrentVersion(version);
         artifact.setStatus(ArtifactStatus.PUBLISHED);
         artifact.setPublishedAt(Instant.now());
         log.info("Published artifact id={} version={} by userId={}", artifactId, version, userId);
         return ArtifactDto.from(artifactRepo.save(artifact));
+    }
+
+    /**
+     * Pushes FORM/DATA_MODEL artifacts into their runtime service's own persistence so what
+     * Studio publishes is actually what the Portal serves. BPMN goes through the bundle-deploy
+     * path instead; DMN/RULE_SET are out of scope (rules-service isn't wired up yet).
+     */
+    private void bridgeToRuntimeService(Artifact artifact) {
+        if (artifact.getType() != ArtifactType.FORM && artifact.getType() != ArtifactType.DATA_MODEL) {
+            return; // BPMN handled by bundle deploy; DMN/RULE_SET out of scope
+        }
+        String displayName = artifact.getDisplayName() != null ? artifact.getDisplayName() : artifact.getName();
+        String content = gitStore.readContent(
+                artifact.getTenantId(), artifact.getType(), artifact.getName(), artifact.getHeadCommitSha());
+
+        if (artifact.getType() == ArtifactType.FORM) {
+            FormPublishPayload payload = formFieldsMapper.map(content);
+            formServiceClient.publish(artifact.getName(), displayName, payload);
+        } else {
+            dataServiceClient.publish(artifact.getName(), displayName, content);
+        }
     }
 
     @Timed(value = "studio.artifact.get-content")

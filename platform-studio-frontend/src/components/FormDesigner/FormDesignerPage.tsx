@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import FieldPalette from './FieldPalette';
 import FormCanvas from './FormCanvas';
@@ -21,11 +21,14 @@ function makeField(type: FieldType): FieldDefinition {
 
 export default function FormDesignerPage() {
   const { id } = useParams<{ id?: string }>();
-  const { saveArtifact } = useArtifactStore();
+  const { saveArtifact, publishArtifact } = useArtifactStore();
 
   const [fields, setFields] = useState<FieldDefinition[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [formName, setFormName] = useState('new-form');
+  const [savedId, setSavedId] = useState<string | null>(id ?? null);
+  const [publishVersion, setPublishVersion] = useState('');
+  const [showPublish, setShowPublish] = useState(false);
   const [status, setStatus] = useState('');
 
   useEffect(() => {
@@ -72,11 +75,24 @@ export default function FormDesignerPage() {
     const schema = { formKey: formName, fields };
     const content = JSON.stringify(schema, null, 2);
     try {
-      await saveArtifact('FORM', formName, content, formName);
+      const saved = await saveArtifact('FORM', formName, content, formName);
+      setSavedId(saved.id);
       setStatus('Saved');
       setTimeout(() => setStatus(''), 2000);
     } catch {
       setStatus('Save failed');
+    }
+  };
+
+  const handlePublish = async () => {
+    if (!savedId || !publishVersion) return;
+    try {
+      await publishArtifact(savedId, publishVersion);
+      setShowPublish(false);
+      setStatus(`Published v${publishVersion}`);
+      setTimeout(() => setStatus(''), 3000);
+    } catch {
+      setStatus('Publish failed');
     }
   };
 
@@ -92,6 +108,22 @@ export default function FormDesignerPage() {
           style={{ padding: '6px 10px', border: '1px solid var(--border)', borderRadius: 6, fontSize: 13, width: 200 }}
         />
         <button className="btn-primary" onClick={handleSave}>Save Form</button>
+        {savedId && (
+          <button className="btn-ghost" onClick={() => setShowPublish(!showPublish)}>
+            Publish
+          </button>
+        )}
+        {showPublish && (
+          <>
+            <input
+              value={publishVersion}
+              onChange={(e) => setPublishVersion(e.target.value)}
+              placeholder="1.0.0"
+              style={{ padding: '6px 10px', border: '1px solid var(--border)', borderRadius: 6, fontSize: 13, width: 100 }}
+            />
+            <button className="btn-primary" onClick={handlePublish}>Confirm</button>
+          </>
+        )}
         {status && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{status}</span>}
         <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-muted)' }}>
           {fields.length} field{fields.length !== 1 ? 's' : ''}

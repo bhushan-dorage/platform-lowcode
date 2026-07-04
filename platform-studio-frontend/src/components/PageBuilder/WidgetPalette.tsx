@@ -1,4 +1,3 @@
-import React from 'react';
 import { useDrag } from 'react-dnd';
 import { WIDGET_DRAG_TYPE, WidgetType, PALETTE_WIDGETS } from './types';
 

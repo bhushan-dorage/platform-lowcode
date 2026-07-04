@@ -1,4 +1,3 @@
-import React from 'react';
 import { useDrop } from 'react-dnd';
 import { WIDGET_DRAG_TYPE, BuiltSection, BuiltWidget, WidgetType, uid, defaultConfig } from './types';
 

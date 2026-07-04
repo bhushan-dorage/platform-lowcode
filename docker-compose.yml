@@ -290,9 +290,200 @@ services:
       retries: 3
       start_period: 30s
 
+  platform-workflow-engine:
+    build:
+      context: ./platform-workflow-engine
+      dockerfile: Dockerfile
+    image: platform-workflow-engine:latest
+    ports:
+      - "8090:8080"
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/platform
+      DB_USER: platform
+      DB_PASSWORD: platform
+      KAFKA_BOOTSTRAP: kafka:9092
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/platform
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  platform-form-service:
+    build:
+      context: ./platform-form-service
+      dockerfile: Dockerfile
+    image: platform-form-service:latest
+    ports:
+      - "8091:8080"
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/platform
+      DB_USER: platform
+      DB_PASSWORD: platform
+      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/platform
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  platform-page-service:
+    build:
+      context: ./platform-page-service
+      dockerfile: Dockerfile
+    image: platform-page-service:latest
+    ports:
+      - "8092:8085"
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/platform
+      DB_USER: platform
+      DB_PASSWORD: platform
+      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/platform
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8085/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  platform-data-service:
+    build:
+      context: ./platform-data-service
+      dockerfile: Dockerfile
+    image: platform-data-service:latest
+    ports:
+      - "8093:8080"
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/platform
+      DB_USER: platform
+      DB_PASSWORD: platform
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/platform
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  platform-entitlements-service:
+    build:
+      context: ./platform-entitlements-service
+      dockerfile: Dockerfile
+    image: platform-entitlements-service:latest
+    ports:
+      - "8094:8085"
+    environment:
+      DATASOURCE_URL: jdbc:postgresql://postgres:5432/platform
+      DATASOURCE_USERNAME: platform
+      DATASOURCE_PASSWORD: platform
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/platform
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8085/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  platform-rules-service:
+    build:
+      context: ./platform-rules-service
+      dockerfile: Dockerfile
+    image: platform-rules-service:latest
+    ports:
+      - "8095:8080"
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/platform
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  platform-studio-backend:
+    build:
+      context: ./platform-studio-backend
+      dockerfile: Dockerfile
+    image: platform-studio-backend:latest
+    ports:
+      - "8096:8086"
+    environment:
+      DATASOURCE_URL: jdbc:postgresql://postgres:5432/platform
+      DATASOURCE_USERNAME: platform
+      DATASOURCE_PASSWORD: platform
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/platform
+      KEYCLOAK_TOKEN_URL: http://keycloak:8080/realms/platform/protocol/openid-connect/token
+      KEYCLOAK_CLIENT_ID: platform-api
+      KEYCLOAK_CLIENT_SECRET: platform-api-secret
+      FORM_SERVICE_BASE_URL: http://platform-form-service:8080
+      DATA_SERVICE_BASE_URL: http://platform-data-service:8080
+      STUDIO_GIT_REPOS_PATH: /var/platform/git-repos
+    volumes:
+      - studio_git_repos:/var/platform/git-repos
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8086/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  platform-studio-frontend:
+    build:
+      context: ./platform-studio-frontend
+      dockerfile: Dockerfile
+    image: platform-studio-frontend:latest
+    ports:
+      - "3001:80"
+    depends_on:
+      - kong
+
 volumes:
   pg_data:
   redis_data:
   ch_data:
   prom_data:
   grafana_data:
+  studio_git_repos:

@@ -6,6 +6,7 @@ import com.platform.common.web.CursorPage;
 import com.platform.data.entity.domain.EntityDefinition;
 import com.platform.data.entity.domain.EntityRecord;
 import com.platform.data.entity.dto.CreateEntityDefinitionRequest;
+import com.platform.data.entity.dto.UpdateEntityDefinitionRequest;
 import com.platform.data.entity.dto.UpsertEntityRecordRequest;
 import com.platform.data.entity.repository.EntityDefinitionRepository;
 import com.platform.data.entity.repository.EntityRecordRepository;
@@ -48,6 +49,17 @@ public class EntityService {
     @Timed(value = "data.entity.definitions.list")
     public List<EntityDefinition> listDefinitions() {
         return defRepo.findByTenantIdAndArchivedFalse(TenantContext.getTenantId());
+    }
+
+    @Timed(value = "data.entity.definition.update")
+    @Transactional
+    public EntityDefinition updateEntityDefinition(String entityType, UpdateEntityDefinitionRequest req) {
+        String tenantId = TenantContext.getTenantId();
+        EntityDefinition def = defRepo.findByTenantIdAndEntityTypeAndArchivedFalse(tenantId, entityType)
+                .orElseThrow(() -> new ResourceNotFoundException("Entity type not found: " + entityType));
+        def.setDisplayName(req.displayName());
+        def.setSchema(req.schema());
+        return defRepo.save(def);
     }
 
     @Timed(value = "data.entity.record.create")

@@ -30,10 +30,13 @@ const inputStyle: React.CSSProperties = {
 };
 
 export default function DataModelerPage() {
-  const { saveArtifact } = useArtifactStore();
+  const { saveArtifact, publishArtifact } = useArtifactStore();
   const [model, setModel] = useState<EntityModel>({
     name: '', displayName: '', description: '', fields: [],
   });
+  const [savedId, setSavedId] = useState<string | null>(null);
+  const [publishVersion, setPublishVersion] = useState('');
+  const [showPublish, setShowPublish] = useState(false);
   const [status, setStatus] = useState('');
 
   const updateModel = (patch: Partial<EntityModel>) => setModel((m) => ({ ...m, ...patch }));
@@ -61,11 +64,24 @@ export default function DataModelerPage() {
       ),
     };
     try {
-      await saveArtifact('DATA_MODEL', model.name, JSON.stringify(schema, null, 2), model.displayName || model.name);
+      const saved = await saveArtifact('DATA_MODEL', model.name, JSON.stringify(schema, null, 2), model.displayName || model.name);
+      setSavedId(saved.id);
       setStatus('Saved');
       setTimeout(() => setStatus(''), 2000);
     } catch {
       setStatus('Save failed');
+    }
+  };
+
+  const handlePublish = async () => {
+    if (!savedId || !publishVersion) return;
+    try {
+      await publishArtifact(savedId, publishVersion);
+      setShowPublish(false);
+      setStatus(`Published v${publishVersion}`);
+      setTimeout(() => setStatus(''), 3000);
+    } catch {
+      setStatus('Publish failed');
     }
   };
 
@@ -76,6 +92,22 @@ export default function DataModelerPage() {
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           {status && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{status}</span>}
           <button className="btn-primary" onClick={handleSave}>Save Model</button>
+          {savedId && (
+            <button className="btn-ghost" onClick={() => setShowPublish(!showPublish)}>
+              Publish
+            </button>
+          )}
+          {showPublish && (
+            <>
+              <input
+                value={publishVersion}
+                onChange={(e) => setPublishVersion(e.target.value)}
+                placeholder="1.0.0"
+                style={{ padding: '6px 10px', border: '1px solid var(--border)', borderRadius: 6, fontSize: 13, width: 100 }}
+              />
+              <button className="btn-primary" onClick={handlePublish}>Confirm</button>
+            </>
+          )}
         </div>
       </div>
 

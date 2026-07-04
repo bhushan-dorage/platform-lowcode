@@ -28,6 +28,12 @@ public class GlobalExceptionHandler {
                 .body(ErrorResponseEnvelope.of("CONFLICT", ex.getMessage(), MDC.get("traceId")));
     }
 
+    @ExceptionHandler(RuntimeServiceBridgeException.class)
+    public ResponseEntity<ErrorResponseEnvelope> handleRuntimeServiceBridge(RuntimeServiceBridgeException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                .body(ErrorResponseEnvelope.of("RUNTIME_SERVICE_UNAVAILABLE", ex.getMessage(), MDC.get("traceId")));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseEnvelope> handleGeneric(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

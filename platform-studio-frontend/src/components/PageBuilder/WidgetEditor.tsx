@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   BuiltWidget, KpiConfig, TableConfig, ChartConfig,
-  FormWidgetConfig, TextConfig, TableColumnDef, uid,
+  FormWidgetConfig, TextConfig, TableColumnDef,
 } from './types';
 
 interface Props {

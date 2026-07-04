@@ -1,5 +1,6 @@
 package com.platform.workflow.config;
 
+import com.platform.workflow.deployment.messaging.BundleDeployEvent;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -54,6 +55,31 @@ public class KafkaConsumerConfig {
         var factory = new ConcurrentKafkaListenerContainerFactory<String, Object>();
         factory.setConsumerFactory(consumerFactory());
         factory.setConcurrency(3);
+        return factory;
+    }
+
+    /**
+     * Dedicated factory for the cross-service studio.deploy.events topic. platform-studio-backend
+     * publishes its own BundleDeployEvent class, which isn't on this module's classpath, so type
+     * headers are ignored and the payload is deserialized structurally into this module's own
+     * BundleDeployEvent — the two services only agree on the JSON wire shape, not a shared class.
+     */
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, BundleDeployEvent> bundleDeployListenerContainerFactory() {
+        JsonDeserializer<BundleDeployEvent> deserializer = new JsonDeserializer<>(BundleDeployEvent.class, false);
+        deserializer.ignoreTypeHeaders();
+        deserializer.trustedPackages("*");
+
+        Map<String, Object> props = new HashMap<>();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        ConsumerFactory<String, BundleDeployEvent> cf =
+                new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), deserializer);
+
+        var factory = new ConcurrentKafkaListenerContainerFactory<String, BundleDeployEvent>();
+        factory.setConsumerFactory(cf);
+        factory.setConcurrency(3);
+        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
         return factory;
     }
 

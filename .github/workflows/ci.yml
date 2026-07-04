@@ -138,6 +138,146 @@ jobs:
         working-directory: platform-webhook-service
         run: mvn -B verify
 
+  build-platform-workflow-engine:
+    needs: [build-platform-bom, build-platform-common]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+      - name: Install platform-bom
+        working-directory: platform-bom
+        run: mvn -B install -DskipTests
+      - name: Install platform-common
+        working-directory: platform-common
+        run: mvn -B install -DskipTests
+      - name: Test platform-workflow-engine
+        working-directory: platform-workflow-engine
+        run: mvn -B verify
+
+  build-platform-form-service:
+    needs: [build-platform-bom, build-platform-common]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+      - name: Install platform-bom
+        working-directory: platform-bom
+        run: mvn -B install -DskipTests
+      - name: Install platform-common
+        working-directory: platform-common
+        run: mvn -B install -DskipTests
+      - name: Test platform-form-service
+        working-directory: platform-form-service
+        run: mvn -B verify
+
+  build-platform-page-service:
+    needs: [build-platform-bom, build-platform-common]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+      - name: Install platform-bom
+        working-directory: platform-bom
+        run: mvn -B install -DskipTests
+      - name: Install platform-common
+        working-directory: platform-common
+        run: mvn -B install -DskipTests
+      - name: Test platform-page-service
+        working-directory: platform-page-service
+        run: mvn -B verify
+
+  build-platform-data-service:
+    needs: [build-platform-bom, build-platform-common]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+      - name: Install platform-bom
+        working-directory: platform-bom
+        run: mvn -B install -DskipTests
+      - name: Install platform-common
+        working-directory: platform-common
+        run: mvn -B install -DskipTests
+      - name: Test platform-data-service
+        working-directory: platform-data-service
+        run: mvn -B verify
+
+  build-platform-entitlements-service:
+    needs: [build-platform-bom, build-platform-common]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+      - name: Install platform-bom
+        working-directory: platform-bom
+        run: mvn -B install -DskipTests
+      - name: Install platform-common
+        working-directory: platform-common
+        run: mvn -B install -DskipTests
+      - name: Test platform-entitlements-service
+        working-directory: platform-entitlements-service
+        run: mvn -B verify
+
+  build-platform-rules-service:
+    needs: [build-platform-bom, build-platform-common]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+      - name: Install platform-bom
+        working-directory: platform-bom
+        run: mvn -B install -DskipTests
+      - name: Install platform-common
+        working-directory: platform-common
+        run: mvn -B install -DskipTests
+      - name: Test platform-rules-service
+        working-directory: platform-rules-service
+        run: mvn -B verify
+
+  build-platform-studio-backend:
+    needs: [build-platform-bom, build-platform-common]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+      - name: Install platform-bom
+        working-directory: platform-bom
+        run: mvn -B install -DskipTests
+      - name: Install platform-common
+        working-directory: platform-common
+        run: mvn -B install -DskipTests
+      - name: Test platform-studio-backend
+        working-directory: platform-studio-backend
+        run: mvn -B verify
+
   build-portal-frontend:
     runs-on: ubuntu-latest
     steps:
@@ -155,6 +295,25 @@ jobs:
         run: npm test
       - name: Build
         working-directory: platform-portal-frontend
+        run: npm run build
+
+  build-studio-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: platform-studio-frontend/package-lock.json
+      - name: Install dependencies
+        working-directory: platform-studio-frontend
+        run: npm ci
+      - name: Run tests
+        working-directory: platform-studio-frontend
+        run: npm test
+      - name: Build
+        working-directory: platform-studio-frontend
         run: npm run build
 
   build-sdk-java:

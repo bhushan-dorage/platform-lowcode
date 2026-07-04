@@ -1,4 +1,3 @@
-import React from 'react';
 import { useDrop } from 'react-dnd';
 import { FIELD_DRAG_TYPE, FieldDefinition, FieldType } from './types';
 

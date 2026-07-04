@@ -1,4 +1,3 @@
-import React from 'react';
 import { useDrag } from 'react-dnd';
 import { FIELD_DRAG_TYPE, FieldType, PALETTE_FIELDS } from './types';
 

@@ -41,4 +41,9 @@ public class FlowableConfig {
     public ManagementService managementService(ProcessEngine processEngine) {
         return processEngine.getManagementService();
     }
+
+    @Bean
+    public RepositoryService repositoryService(ProcessEngine processEngine) {
+        return processEngine.getRepositoryService();
+    }
 }

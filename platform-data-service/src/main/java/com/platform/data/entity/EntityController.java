@@ -5,6 +5,7 @@ import com.platform.common.web.StandardResponseEnvelope;
 import com.platform.data.entity.domain.EntityDefinition;
 import com.platform.data.entity.domain.EntityRecord;
 import com.platform.data.entity.dto.CreateEntityDefinitionRequest;
+import com.platform.data.entity.dto.UpdateEntityDefinitionRequest;
 import com.platform.data.entity.dto.UpsertEntityRecordRequest;
 import com.platform.data.entity.service.EntityService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,6 +38,13 @@ public class EntityController {
     @GetMapping("/definitions")
     public ResponseEntity<StandardResponseEnvelope<List<EntityDefinition>>> listDefinitions(HttpServletRequest http) {
         return ResponseEntity.ok(ok(entityService.listDefinitions(), http));
+    }
+
+    @PutMapping("/definitions/{entityType}")
+    public ResponseEntity<StandardResponseEnvelope<EntityDefinition>> updateEntityDefinition(
+            @PathVariable String entityType,
+            @Valid @RequestBody UpdateEntityDefinitionRequest req, HttpServletRequest http) {
+        return ResponseEntity.ok(ok(entityService.updateEntityDefinition(entityType, req), http));
     }
 
     @PostMapping("/{entityType}")

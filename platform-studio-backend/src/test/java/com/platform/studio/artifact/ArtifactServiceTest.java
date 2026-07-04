@@ -2,6 +2,10 @@ package com.platform.studio.artifact;
 
 import com.platform.common.tenant.TenantContext;
 import com.platform.common.tenant.TenantTier;
+import com.platform.studio.artifact.bridge.DataServiceClient;
+import com.platform.studio.artifact.bridge.FormFieldsToJsonSchemaMapper;
+import com.platform.studio.artifact.bridge.FormPublishPayload;
+import com.platform.studio.artifact.bridge.FormServiceClient;
 import com.platform.studio.artifact.domain.Artifact;
 import com.platform.studio.artifact.domain.ArtifactStatus;
 import com.platform.studio.artifact.domain.ArtifactType;
@@ -31,6 +35,9 @@ class ArtifactServiceTest {
 
     @Mock ArtifactRepository artifactRepo;
     @Mock GitArtifactStore gitStore;
+    @Mock FormFieldsToJsonSchemaMapper formFieldsMapper;
+    @Mock FormServiceClient formServiceClient;
+    @Mock DataServiceClient dataServiceClient;
     @InjectMocks ArtifactService artifactService;
 
     @BeforeEach
@@ -101,6 +108,55 @@ class ArtifactServiceTest {
         verify(gitStore).tag("acme", ArtifactType.BPMN, "invoice-approval", "1.0.0", "sha123");
         assertThat(artifact.getStatus()).isEqualTo(ArtifactStatus.PUBLISHED);
         assertThat(artifact.getCurrentVersion()).isEqualTo("1.0.0");
+        verifyNoInteractions(formServiceClient, dataServiceClient);
+    }
+
+    @Test
+    void publish_formArtifact_bridgesToFormService() {
+        UUID id = UUID.randomUUID();
+        Artifact artifact = new Artifact();
+        artifact.setId(id);
+        artifact.setTenantId("acme");
+        artifact.setType(ArtifactType.FORM);
+        artifact.setName("intake-form");
+        artifact.setDisplayName("Intake Form");
+        artifact.setHeadCommitSha("sha123");
+        artifact.setStatus(ArtifactStatus.DRAFT);
+
+        when(artifactRepo.findByIdAndTenantId(id, "acme")).thenReturn(Optional.of(artifact));
+        when(artifactRepo.save(any())).thenReturn(artifact);
+        when(gitStore.readContent("acme", ArtifactType.FORM, "intake-form", "sha123"))
+                .thenReturn("{\"formKey\":\"intake-form\",\"fields\":[]}");
+        FormPublishPayload payload = new FormPublishPayload("{}", "[]");
+        when(formFieldsMapper.map(any())).thenReturn(payload);
+
+        artifactService.publish(id, "1.0.0", "alice");
+
+        verify(formServiceClient).publish("intake-form", "Intake Form", payload);
+        verifyNoInteractions(dataServiceClient);
+    }
+
+    @Test
+    void publish_dataModelArtifact_bridgesToDataService() {
+        UUID id = UUID.randomUUID();
+        Artifact artifact = new Artifact();
+        artifact.setId(id);
+        artifact.setTenantId("acme");
+        artifact.setType(ArtifactType.DATA_MODEL);
+        artifact.setName("invoice");
+        artifact.setDisplayName("Invoice");
+        artifact.setHeadCommitSha("sha456");
+        artifact.setStatus(ArtifactStatus.DRAFT);
+
+        when(artifactRepo.findByIdAndTenantId(id, "acme")).thenReturn(Optional.of(artifact));
+        when(artifactRepo.save(any())).thenReturn(artifact);
+        when(gitStore.readContent("acme", ArtifactType.DATA_MODEL, "invoice", "sha456"))
+                .thenReturn("{\"type\":\"object\",\"properties\":{}}");
+
+        artifactService.publish(id, "1.0.0", "alice");
+
+        verify(dataServiceClient).publish("invoice", "Invoice", "{\"type\":\"object\",\"properties\":{}}");
+        verifyNoInteractions(formServiceClient);
     }
 
     @Test

@@ -42,7 +42,7 @@ class TaskClaimServiceTest {
 
     @Test
     void claimWithLock_executesActionWhenLockAcquired() throws Exception {
-        when(rLock.tryLock(5, 5, TimeUnit.SECONDS)).thenReturn(true);
+        when(rLock.tryLock(5, 30, TimeUnit.SECONDS)).thenReturn(true);
         AtomicBoolean executed = new AtomicBoolean(false);
 
         taskClaimService.claimWithLock("task-1", "user-1", () -> executed.set(true));
@@ -53,7 +53,7 @@ class TaskClaimServiceTest {
 
     @Test
     void claimWithLock_throwsWhenLockNotAcquired() throws Exception {
-        when(rLock.tryLock(5, 5, TimeUnit.SECONDS)).thenReturn(false);
+        when(rLock.tryLock(5, 30, TimeUnit.SECONDS)).thenReturn(false);
 
         assertThatThrownBy(() -> taskClaimService.claimWithLock("task-2", "user-1", () -> {}))
                 .isInstanceOf(TaskAlreadyClaimedException.class)
@@ -64,7 +64,7 @@ class TaskClaimServiceTest {
 
     @Test
     void claimWithLock_releasesLockEvenIfActionThrows() throws Exception {
-        when(rLock.tryLock(5, 5, TimeUnit.SECONDS)).thenReturn(true);
+        when(rLock.tryLock(5, 30, TimeUnit.SECONDS)).thenReturn(true);
 
         assertThatThrownBy(() ->
                 taskClaimService.claimWithLock("task-3", "user-1", () -> {
@@ -77,7 +77,7 @@ class TaskClaimServiceTest {
 
     @Test
     void claimWithLock_usesCorrectLockKey() throws Exception {
-        when(rLock.tryLock(5, 5, TimeUnit.SECONDS)).thenReturn(true);
+        when(rLock.tryLock(5, 30, TimeUnit.SECONDS)).thenReturn(true);
 
         taskClaimService.claimWithLock("task-42", "user-1", () -> {});
 
