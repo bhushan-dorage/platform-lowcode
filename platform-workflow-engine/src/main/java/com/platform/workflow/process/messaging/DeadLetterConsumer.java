@@ -26,7 +26,6 @@ public class DeadLetterConsumer {
                 event.errorMessage());
 
         Counter.builder("workflow.dead_letter.received")
-                .tag("tenantId", event.originalEvent().tenantId())
                 .tag("eventType", "process.start")
                 .register(meterRegistry)
                 .increment();

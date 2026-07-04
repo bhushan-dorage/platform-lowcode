@@ -63,9 +63,12 @@ public class IdempotencyFilter implements Filter {
 
         String cached = redisTemplate.opsForValue().get(cacheKey);
         if (cached != null) {
-            httpResp.setStatus(HttpServletResponse.SC_OK);
+            int sep = cached.indexOf('|');
+            int status = Integer.parseInt(cached.substring(0, sep));
+            String body = cached.substring(sep + 1);
+            httpResp.setStatus(status);
             httpResp.setContentType("application/json");
-            httpResp.getWriter().write(cached);
+            httpResp.getWriter().write(body);
             return;
         }
 
@@ -74,11 +77,13 @@ public class IdempotencyFilter implements Filter {
         try {
             chain.doFilter(request, responseWrapper);
         } finally {
-            byte[] body = responseWrapper.getContentAsByteArray();
-            if (body.length > 0 && responseWrapper.getStatus() < 300) {
-                // Only cache successful responses — errors (4xx/5xx) should not be replayed
-                String bodyStr = new String(body, responseWrapper.getCharacterEncoding());
-                redisTemplate.opsForValue().set(cacheKey, bodyStr, TTL.toSeconds(), TimeUnit.SECONDS);
+            byte[] responseBody = responseWrapper.getContentAsByteArray();
+            if (responseBody.length > 0 && responseWrapper.getStatus() < 300) {
+                // Only cache successful responses — errors (4xx/5xx) should not be replayed.
+                // Format: "<statusCode>|<body>" so the original status is replayed, not always 200.
+                String entry = responseWrapper.getStatus() + "|" + new String(responseBody, responseWrapper.getCharacterEncoding());
+                // setIfAbsent prevents a concurrent first request from overwriting an already-stored entry
+                redisTemplate.opsForValue().setIfAbsent(cacheKey, entry, TTL.toSeconds(), TimeUnit.SECONDS);
             }
             // Copy the buffered response to the actual response stream
             responseWrapper.copyBodyToResponse();
